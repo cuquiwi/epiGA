@@ -1,4 +1,5 @@
-
+from random import shuffle
+import cell
 
 def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, max_epoch = 500):
     population = init_population(individualsNb, cellsNb)
@@ -14,8 +15,16 @@ def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, max_epoch
         i = i+1
 
 def init_population(individualsNb, cellsNb):
-    #TODO
-    return 0
+    population = []
+    for i in range(individualsNb):
+        individual = []
+        for j in range(cellsNb):
+            solution = shuffle([k+1 for k in range(128)]) #TODO generalize solution for other problems than a280
+            individual.append(cell.Cell(solution))
+
+        population.append(individual)
+
+    return population
 
 def selection(population):
     #TODO
