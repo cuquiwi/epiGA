@@ -131,10 +131,6 @@ def nucleosome_reproduction(population):
    #TODO
     return population
 
-def generate_nucleosome(population, nucleo_prob, nucleoRad):
-    #TODO
-    return population
-
 def epigen_mechanism(population, epiProb):
     #TODO
     return population
