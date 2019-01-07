@@ -20,6 +20,7 @@ def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanism
     termination_condition = False
     while not termination_condition:
         newpop = selection(population[i])
+        newpop = nucleosome_generation(newpop, nucleoProb, nucleoRad)
         newpop = nucleosome_reproduction(newpop)
         newpop = epigen_mechanism(newpop, epiProb)
 
@@ -53,6 +54,10 @@ def init_population(individualsNb, cellsNb):
     return population
 
 def selection(population):
+    #TODO
+    return population
+
+def nucleosome_generation(population, prob, radius):
     #TODO
     return population
 
