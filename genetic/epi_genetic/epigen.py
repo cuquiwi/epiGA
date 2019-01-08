@@ -151,7 +151,16 @@ def crossover(baseSolution, secondSolution, mask):
     return baseSolution
 
 def removeWorstCell(individual, newCell):
-    #TODO:  Add description
+    """
+    Function that generates a new individual changing its worst cell
+    Inputs: 
+        - individual: List of Cells that form the base individual from 
+            which the new individual is formed
+        - newCell: The cell that is going to replace the worst cell of 
+            the received individual
+    Output:
+        New individual based in the received one with the newCell
+    """
     newInd = []
     for cell in individual:
         newInd.append(cell)
@@ -162,7 +171,13 @@ def removeWorstCell(individual, newCell):
     
 
 def nucleosome_reproduction(population):
-    #TODO:  Add description
+    """
+    Function that generates the new population based on nucleosome reproduction
+    Inputs: 
+        - population: list of individuals of the previous generation
+    Output: 
+        The list of children of the provious population
+    """
     newPop = []
     for i1 in population:
        for i2 in population:
