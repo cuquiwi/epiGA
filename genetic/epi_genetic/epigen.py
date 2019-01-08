@@ -23,7 +23,7 @@ def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucle
         newpop = selection(population[i])
         newpop = nucleosome_generation(newpop, nucleoProb, nucleoRad)
         newpop = nucleosome_reproduction(newpop)
-        newpop = epigen_mechanism(newpop, epiProb)
+        newpop = epigen_mechanism(newpop, mechanisms, epiProb)
 
         aux_population.append(newpop)
         population.append(replacement(population[i], newpop))
@@ -72,7 +72,8 @@ def init_population(individualsNb, cellsNb, solutionLength):
         for j in range(cellsNb):
             solution = [k+1 for k in range(solutionLength)]
             shuffle(solution)
-            individual.append(Cell(solution))
+
+            individual.append(Cell(solution, fitness=evaluate_cell(solution)))#TODO: La funcion evaluate_cell va a cambiar.
 
         population.append(individual)
 
@@ -131,9 +132,30 @@ def nucleosome_reproduction(population):
    #TODO
     return population
 
-def epigen_mechanism(population, epiProb):
-    #TODO
+def epigen_mechanism(population, mechanisms, epiProb):
+    """
+    This function applies to each cell of the population the epigenetic
+    mechanisms with its corresponding probabilities.
+    Inputs:
+        - population: the total population.
+        - mechanisms: A list of mechanisms that we will apply.
+        - epiProb: A list of probabilities corresponding to the previous
+                   specified mechanisms.
+    Output:
+        The new modified population.
+    """
+    for i in range(len(population)):
+        individual = population[i]
+        for j in range(len(individual)):
+            cells = individual[j]
+            cells = apply_mechanisms(mechanisms, cells, epiProb)
+            individual[j] = cells
+        population[i] = individual
     return population
+
+def apply_mechanisms(mechanisms, cells, epiProb):
+    #TODO: Hacer los mecanismos
+    return cells
 
 def replacement(oldpop,  newpop):
     #TODO
