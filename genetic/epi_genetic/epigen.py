@@ -70,10 +70,9 @@ def init_population(individualsNb, cellsNb, solutionLength):
     for i in range(individualsNb):
         individual = []
         for j in range(cellsNb):
-            solution = shuffle([k+1 for k in range(solutionLength)])
-            cell = Cell(solution)
-            evaluate_cell(cell)
-            individual.append(cell)
+            solution = [k+1 for k in range(solutionLength)]
+            shuffle(solution)
+            individual.append(Cell(solution))
 
         population.append(individual)
 
