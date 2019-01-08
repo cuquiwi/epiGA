@@ -1,10 +1,11 @@
 from random import shuffle, random
 from cell import Cell
 
-def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
+def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
     """
     EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
     Inputs:
+        problemMatrix: Matrix with the distances for each city
         individualsNb: Number of individuals in the problem.
         cellsNb: Number of cells per each individual.
         epiProb: Epigenetic probabilities list.
@@ -14,7 +15,7 @@ def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanism
                     in the same order as the epiProb list.
         environment: Environment rules
     """
-    population = init_population(individualsNb, cellsNb)
+    population = init_population(individualsNb, cellsNb, len(problemMatrix))
     aux_population = []
     i = 0
     termination_condition = False
@@ -56,7 +57,7 @@ def evaluate_cell(solution):
     #TODO: Hacer la funcion que evalua el problema
     return 3.1415926535
 
-def init_population(individualsNb, cellsNb):
+def init_population(individualsNb, cellsNb, solutionLength):
     """
     The initial population of the EpiGA.
     Inputs:
@@ -69,7 +70,7 @@ def init_population(individualsNb, cellsNb):
     for i in range(individualsNb):
         individual = []
         for j in range(cellsNb):
-            solution = shuffle([k+1 for k in range(128)]) #TODO generalize solution for other problems than a280
+            solution = shuffle([k+1 for k in range(solutionLength)])
             cell = Cell(solution)
             evaluate_cell(cell)
             individual.append(cell)
