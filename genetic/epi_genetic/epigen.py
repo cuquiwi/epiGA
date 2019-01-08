@@ -162,9 +162,51 @@ def epigen_mechanism(population, mechanisms, epiProb):
         population[i] = individual
     return population
 
-def apply_mechanisms(mechanisms, cells, epiProb):
-    #TODO: Hacer los mecanismos
-    return cells
+def apply_mechanisms(mechanisms, cell, epiProb):
+    """
+    This function applies the epigenetic mechanisms to a given cell
+    with some probability.
+    Already implemented mechanisms:
+        - ...
+    Possible future implemented mechanisms:
+        - "imprinting"
+        - "reprogramming"
+        - "permutation"
+        - "position"
+        - "inactivation"
+        - "bookmarking"
+        - "silencing"
+    Inputs:
+        - mechanisms: List of mechanisms to be applied.
+        - cell: The cell in which we will apply a mechanism.
+        - epiProb: List of probabilities for every listed mechanism.
+    Output:
+        The new modified cell.
+    """
+    for i in range(len(mechanisms)):
+        if random() < epiProb[i]:
+            if mechanisms[i] == "imprinting":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "reprogramming":
+                #TODO: Hacer reprogramming
+                pass
+            elif mechanisms[i] == "permutation":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "position":
+                #TODO: Hacer position effect
+                pass
+            elif mechanisms[i] == "inactivation":
+                #TODO: Hacer x-inactivation
+                pass
+            elif mechanisms[i] == "bookmarking":
+                #TODO: Hacer bookmarking
+                pass
+            elif mechanisms[i] == "silencing":
+                #TODO: Hacer gene silencing
+                pass
+    return cell
 
 def replacement(oldpop,  newpop):
     #TODO
