@@ -1,10 +1,15 @@
 from random import shuffle, random
 from cell import Cell
+import numpy as np
 
-def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
+
+distMatrix = [[1]] #TODO: Hacer global la matriz de distancias y llamarla asi.
+
+def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
     """
     EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
     Inputs:
+        problemMatrix: Matrix with the distances for each city
         individualsNb: Number of individuals in the problem.
         cellsNb: Number of cells per each individual.
         epiProb: Epigenetic probabilities list.
@@ -14,7 +19,7 @@ def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanism
                     in the same order as the epiProb list.
         environment: Environment rules
     """
-    population = init_population(individualsNb, cellsNb)
+    population = init_population(individualsNb, cellsNb, len(problemMatrix))
     aux_population = []
     i = 0
     termination_condition = False
@@ -22,7 +27,7 @@ def epigen_alg(individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanism
         newpop = selection(population[i])
         newpop = nucleosome_generation(newpop, nucleoProb, nucleoRad)
         newpop = nucleosome_reproduction(newpop)
-        newpop = epigen_mechanism(newpop, epiProb)
+        newpop = epigen_mechanism(newpop, mechanisms, epiProb)
 
         aux_population.append(newpop)
         population.append(replacement(population[i], newpop))
@@ -45,23 +50,31 @@ def termination(i, max_epoch):
     else:
         return False
 
-def evaluate_cell(solution):
+def evaluate_cell(cell, distMatrix):
     """
-    Function that evaluates the fitness of our problem for a given cell.
+    Function that evaluates the fitness of our problem for a given cell
+    and sets the cell fitness.
     Inputs:
-        - solution: a cell which contains the solution.
+        - cell: a cell which contains the solution.
+        - distMatrix: Matrix with the distance
     Outputs:
         The fitness value of a given cell.
     """
-    #TODO: Hacer la funcion que evalua el problema
-    return 3.1415926535
+    solution = cell.solution
+    fitness = 0
+    for i in range(1,len(solution)):
+        fitness += distMatrix[i-1][i]
+    cell.setfitness(fitness)
+    
+    return fitness
 
-def init_population(individualsNb, cellsNb):
+def init_population(individualsNb, cellsNb, distMatrix):
     """
     The initial population of the EpiGA.
     Inputs:
         - individualsNb: Number of initial individuals in the problem.
         - cellsNb: Number of cells per each individual.
+        - distMatrix: Matrix with the distance
     Return:
         A list of cell elements representing the initial population.
     """
@@ -69,9 +82,10 @@ def init_population(individualsNb, cellsNb):
     for i in range(individualsNb):
         individual = []
         for j in range(cellsNb):
-            solution = shuffle([k+1 for k in range(128)]) #TODO generalize solution for other problems than a280
+            solution = [k+1 for k in range(len(distMatrix))]
+            shuffle(solution)
             cell = Cell(solution)
-            evaluate_cell(cell)
+            evaluate_cell(cell, distMatrix)
             individual.append(cell)
 
         population.append(individual)
@@ -123,23 +137,119 @@ def collapse(nucleosome, radius, k):
     Output:
         The new modified nucleosome.
     """
-    # TODO: Checkear si esto es correcto, o me lo he patillado. Pag. 257.
     for i in range(-radius, radius+1,1):
         nucleosome[k+i] = 1
     return nucleosome
 
+def selectBestCell(individual):
+    #TODO:  Add description
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    return individual(np.argmax(fitness))
+
+def crossover(baseSolution, secondSolution, mask):
+    #TODO:  Add description
+    # TODO:  Implement Partially-mapped Crossover (PMX) 
+    # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
+    return baseSolution
+
+def removeWorstCell(individual, newCell):
+    #TODO:  Add description
+    newInd = []
+    for cell in individual:
+        newInd.append(cell)
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    newInd.remove(individual[np.argmin(fitness)])
+    newInd.append(newCell)
+    return newInd
+    
+
 def nucleosome_reproduction(population):
-   #TODO
+    #TODO:  Add description
+    newPop = []
+    for i1 in population:
+       for i2 in population:
+           if (not (i1 == i2)):
+                bestCell1 = selectBestCell(i1)
+                bestCell2 = selectBestCell(i2)
+                newNucleosome = np.logical_or(bestCell1.nucleosome, bestCell2.nucleosome)
+                fatherBasedSolution = crossover(bestCell1.solution, bestCell2.solution, newNucleosome)
+                motherBasedSolution = crossover(bestCell2.solution, bestCell1.solution, newNucleosome)
+                newCellI1 = Cell(fatherBasedSolution, bestCell1.solution,bestCell2.solution,newNucleosome)
+                newCellI2 = Cell(motherBasedSolution, bestCell2.solution,bestCell1.solution,newNucleosome)
+                i1_child = removeWorstCell(i1, newCellI1)
+                i2_child = removeWorstCell(i2, newCellI2)
+                newPop.append(i1_child, i2_child)
+    return newPop
+
+def epigen_mechanism(population, mechanisms, epiProb):
+    """
+    This function applies to each cell of the population the epigenetic
+    mechanisms with its corresponding probabilities.
+    Inputs:
+        - population: the total population.
+        - mechanisms: A list of mechanisms that we will apply.
+        - epiProb: A list of probabilities corresponding to the previous
+                   specified mechanisms.
+    Output:
+        The new modified population.
+    """
+    for i in range(len(population)):
+        individual = population[i]
+        for j in range(len(individual)):
+            cells = individual[j]
+            cells = apply_mechanisms(mechanisms, cells, epiProb)
+            evaluate_cell(cells, distMatrix)
+            individual[j] = cells
+        population[i] = individual
     return population
 
-def epigen_mechanism(population, epiProb):
-    #TODO
-    return population
+def apply_mechanisms(mechanisms, cell, epiProb):
+    """
+    This function applies the epigenetic mechanisms to a given cell
+    with some probability.
+    Already implemented mechanisms:
+        - ...
+    Possible future implemented mechanisms:
+        - "imprinting"
+        - "reprogramming"
+        - "permutation"
+        - "position"
+        - "inactivation"
+        - "bookmarking"
+        - "silencing"
+    Inputs:
+        - mechanisms: List of mechanisms to be applied.
+        - cell: The cell in which we will apply a mechanism.
+        - epiProb: List of probabilities for every listed mechanism.
+    Output:
+        The new modified cell.
+    """
+    for i in range(len(mechanisms)):
+        if random() < epiProb[i]:
+            if mechanisms[i] == "imprinting":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "reprogramming":
+                #TODO: Hacer reprogramming
+                pass
+            elif mechanisms[i] == "permutation":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "position":
+                #TODO: Hacer position effect
+                pass
+            elif mechanisms[i] == "inactivation":
+                #TODO: Hacer x-inactivation
+                pass
+            elif mechanisms[i] == "bookmarking":
+                #TODO: Hacer bookmarking
+                pass
+            elif mechanisms[i] == "silencing":
+                #TODO: Hacer gene silencing
+                pass
+    return cell
 
 def replacement(oldpop,  newpop):
     #TODO
     return newpop
 
-def evaluate_cell(cell):
-    #TODO
-    return cell
