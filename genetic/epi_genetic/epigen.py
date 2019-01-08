@@ -46,23 +46,31 @@ def termination(i, max_epoch):
     else:
         return False
 
-def evaluate_cell(solution):
+def evaluate_cell(cell, distMatrix):
     """
-    Function that evaluates the fitness of our problem for a given cell.
+    Function that evaluates the fitness of our problem for a given cell
+    and sets the cell fitness.
     Inputs:
-        - solution: a cell which contains the solution.
+        - cell: a cell which contains the solution.
+        - distMatrix: Matrix with the distance
     Outputs:
         The fitness value of a given cell.
     """
-    #TODO: Hacer la funcion que evalua el problema
-    return 3.1415926535
+    solution = cell.solution
+    fitness = 0
+    for i in range(1,len(solution)):
+        fitness += distMatrix[i-1][i]
+    cell.setfitness(fitness)
+    
+    return fitness
 
-def init_population(individualsNb, cellsNb, solutionLength):
+def init_population(individualsNb, cellsNb, distMatrix):
     """
     The initial population of the EpiGA.
     Inputs:
         - individualsNb: Number of initial individuals in the problem.
         - cellsNb: Number of cells per each individual.
+        - distMatrix: Matrix with the distance
     Return:
         A list of cell elements representing the initial population.
     """
@@ -70,9 +78,11 @@ def init_population(individualsNb, cellsNb, solutionLength):
     for i in range(individualsNb):
         individual = []
         for j in range(cellsNb):
-            solution = [k+1 for k in range(solutionLength)]
+            solution = [k+1 for k in range(len(distMatrix))]
             shuffle(solution)
-            individual.append(Cell(solution))
+            cell = Cell(solution)
+            evaluate_cell(cell, distMatrix)
+            individual.append(cell)
 
         population.append(individual)
 

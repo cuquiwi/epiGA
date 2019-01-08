@@ -11,3 +11,6 @@ class Cell:
             self.nucleosome = np.zeros(len(solution))
         else:
             self.nucleosome = nucleosome
+
+    def setfitness(self, fitness):
+        self.fitness = fitness
