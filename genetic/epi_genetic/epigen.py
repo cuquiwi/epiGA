@@ -69,9 +69,10 @@ def init_population(individualsNb, cellsNb):
     for i in range(individualsNb):
         individual = []
         for j in range(cellsNb):
-            solution = [k+1 for k in range(128)]
-            shuffle(solution) #TODO generalize solution for other problems than a280
-            individual.append(Cell(solution))
+            solution = shuffle([k+1 for k in range(128)]) #TODO generalize solution for other problems than a280
+            cell = Cell(solution)
+            evaluate_cell(cell)
+            individual.append(cell)
 
         population.append(individual)
 
@@ -138,3 +139,7 @@ def epigen_mechanism(population, epiProb):
 def replacement(oldpop,  newpop):
     #TODO
     return newpop
+
+def evaluate_cell(cell):
+    #TODO
+    return cell
