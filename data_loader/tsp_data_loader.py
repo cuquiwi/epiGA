@@ -1,0 +1,51 @@
+import numpy as np
+import re
+
+
+def load_problem_file(file_name):
+    """Loads a data file containg a TSP problem defined by iwr in their own
+       format
+
+    Arguments:
+        file_name {str} -- Path to the file
+    Returns:
+        matrix NxN -- Symetric matrix with the distances among cities.
+    """
+    coordinates = []
+    with open(file_name, 'r') as file:
+        for line in file.readlines()[6:-1]:
+            raw_coordinates = re.findall(r'\d+', line)[1:]
+            coordinates.append(
+                np.array([
+                    int(raw_coordinates[0]),
+                    int(raw_coordinates[1])
+                ])
+            )
+
+    distance_matrix = np.zeros((len(coordinates), len(coordinates)))
+    for i in range(len(coordinates)):
+        for j in range(len(coordinates)):
+            distance_matrix[i][j] = np.linalg.norm(
+                coordinates[i] - coordinates[j]
+            )
+
+    return distance_matrix
+
+
+def load_solution_file(file_name):
+    """Loads a solution file containing a TSP problem defined by iwr in their
+    own format
+
+    Arguments:
+        file_name {str} -- Path to the file
+    Returns:
+        vector -- Ordered cities
+    """
+
+    path = []
+    with open(file_name, 'r') as file:
+        for line in file.readlines()[4:-2]:
+            city_index = int(re.findall(r'\d+', line)[0]) - 1
+            path.append(city_index)
+
+    return path

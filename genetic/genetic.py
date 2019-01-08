@@ -14,7 +14,7 @@ class TSPIndividual(object):
 
 class ITSPGeneticAlgorithm(object):
 
-    def __init__(self, population_size=100, mutation_rate=.01,
+    def __init__(self, population_size=100, mutation_rate=.1,
                  max_epochs=10000):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -123,8 +123,8 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         pick a random range from the first parent, use it as it is and fill the 
         the remaining space with the cities left in the order of the second path
 
-        [1,2,3,4]
-                (pick from 1 to 2)[2,3,1,4]
+        [4,2,3,1]
+                (pick from 1 to 2)[1,2,3,4]
         [3,2,1,4]
         
         Returns:
@@ -137,10 +137,14 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         ini = randint(0, len(path_1) - 1)
         end = randint(ini, len(path_1))
 
-        new_path = path_1[ini:end]
-        for city in path_2:
-            if city not in new_path:
-                new_path.append(city)
+        new_path = [-1 for _ in range(len(path_2))]
+        new_path[ini:end] = path_1[ini:end]
+
+        for city in [city for city in path_2 if city not in new_path]:
+            for i in range(len(new_path)):
+                if new_path[i] == -1:
+                    new_path[i] = city
+                    break
 
         return TSPIndividual(new_path)
 
