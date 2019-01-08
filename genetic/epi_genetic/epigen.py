@@ -124,7 +124,6 @@ def collapse(nucleosome, radius, k):
     Output:
         The new modified nucleosome.
     """
-    # TODO: Checkear si esto es correcto, o me lo he patillado. Pag. 257.
     for i in range(-radius, radius+1,1):
         nucleosome[k+i] = 1
     return nucleosome
@@ -141,6 +140,3 @@ def replacement(oldpop,  newpop):
     #TODO
     return newpop
 
-def evaluate_cell(cell):
-    #TODO
-    return cell
