@@ -1,5 +1,7 @@
 from random import shuffle, random
 from cell import Cell
+import numpy as np
+
 
 def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
     """
@@ -127,9 +129,45 @@ def collapse(nucleosome, radius, k):
         nucleosome[k+i] = 1
     return nucleosome
 
+def selectBestCell(individual):
+    #TODO:  Add description
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    return individual(np.argmax(fitness))
+
+def crossover(baseSolution, secondSolution, mask):
+    #TODO:  Add description
+    # TODO:  Implement Partially-mapped Crossover (PMX) 
+    # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
+    return baseSolution
+
+def removeWorstCell(individual, newCell):
+    #TODO:  Add description
+    newInd = []
+    for cell in individual:
+        newInd.append(cell)
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    newInd.remove(individual[np.argmin(fitness)])
+    newInd.append(newCell)
+    return newInd
+    
+
 def nucleosome_reproduction(population):
-   #TODO
-    return population
+    #TODO:  Add description
+    newPop = []
+    for i1 in population:
+       for i2 in population:
+           if (not (i1 == i2)):
+                bestCell1 = selectBestCell(i1)
+                bestCell2 = selectBestCell(i2)
+                newNucleosome = np.logical_or(bestCell1.nucleosome, bestCell2.nucleosome)
+                fatherBasedSolution = crossover(bestCell1.solution, bestCell2.solution, newNucleosome)
+                motherBasedSolution = crossover(bestCell2.solution, bestCell1.solution, newNucleosome)
+                newCellI1 = Cell(fatherBasedSolution, bestCell1.solution,bestCell2.solution,newNucleosome)
+                newCellI2 = Cell(motherBasedSolution, bestCell2.solution,bestCell1.solution,newNucleosome)
+                i1_child = removeWorstCell(i1, newCellI1)
+                i2_child = removeWorstCell(i2, newCellI2)
+                newPop.append(i1_child, i2_child)
+    return newPop
 
 def epigen_mechanism(population, epiProb):
     #TODO
