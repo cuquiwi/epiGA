@@ -3,6 +3,8 @@ from cell import Cell
 import numpy as np
 
 
+distMatrix = [[1]] #TODO: Hacer global la matriz de distancias y llamarla asi.
+
 def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
     """
     EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
@@ -196,6 +198,7 @@ def epigen_mechanism(population, mechanisms, epiProb):
         for j in range(len(individual)):
             cells = individual[j]
             cells = apply_mechanisms(mechanisms, cells, epiProb)
+            evaluate_cell(cells, distMatrix)
             individual[j] = cells
         population[i] = individual
     return population
