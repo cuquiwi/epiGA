@@ -199,10 +199,37 @@ class EpigeneticAlgorithm(object):
         return individual(np.argmax(fitness))
 
     def crossover(self, baseSolution, secondSolution, mask):
-        # TODO:  Add description
-        # TODO:  Implement Partially-mapped Crossover (PMX)
+        """
+        This function performs PMX (Partial-Mapping Crossover)
+        Inputs:
+            - basesolution: solution that is going to be used as base
+            - secondSolution: solution that is going to be used to replace
+            the areas that are not bent in the chromosome of the baseSolution
+            - mask: Defines the areas in which the chromosome is bent (i.e. the 
+            places that are going to be passed on to the next generation)
+        """
+        #Define mask for the substitution of values so that they are not repeated
+        mapping = {}
+        for i in range(len(mask)):
+            #The mask uses values from the bent area of the base solution
+            if (mask[i]):
+                mapping[baseSolution[i]] = secondSolution[i]
+            
+        #Start the new solution as the baseSolution
+        newsolution = baseSolution
+        for j in range(len(newsolution)):
+            #If the chromosome is not bent, we must replace with second solution value
+            if (not mask[j]):
+                city = secondSolution[j]
+                #However, if it is going to be a repeated value, we use the generated map
+                if (city in mapping):
+                    newsolution[j] = mapping[city]
+                else:
+                    newsolution[j] = city
+            
         # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
-        return baseSolution
+
+        return newsolution
 
     def removeWorstCell(self, individual, newCell):
         """
