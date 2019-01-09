@@ -1,5 +1,6 @@
 from random import sample, randint, random
 import numpy as np
+import matplotlib.pyplot as plt
 
 class TSPIndividual(object):
 
@@ -20,12 +21,16 @@ class ITSPGeneticAlgorithm(object):
         self.mutation_rate = mutation_rate
         self.max_epochs = max_epochs
 
-    def call(self, distance_matrix):
+    def call(self, distance_matrix, coordinates, optimal_path):
         population = self.do_initialize_population(len(distance_matrix))
+        
+        plt.ion()
+
+        self.on_launch(0, 10)
 
         for _ in range(self.max_epochs):
             self.do_calculate_fitness(population, distance_matrix)
-            self.print_metric(population)
+            self.print_metric(population, coordinates, optimal_path)
 
             new_population = []
             for _ in range(self.population_size):
@@ -38,7 +43,7 @@ class ITSPGeneticAlgorithm(object):
 
         return population
 
-    def print_metric(self, population):
+    def print_metric(self, population, coordinates, optimal_path):
         fitness = 0
         min_ind = None
         #min_ind = max(population, key=lambda x:x.fitness)
@@ -47,6 +52,9 @@ class ITSPGeneticAlgorithm(object):
                 fitness = individual.fitness
                 min_ind = individual
         print(f'Best Individual is: {min_ind}')
+
+        self.on_running(coordinates, min_ind.path)
+
 
     def do_initialize_population(self, n_cities):
         raise NotImplementedError()
@@ -65,6 +73,33 @@ class ITSPGeneticAlgorithm(object):
 
     def do_next_generation(self, olders, newers):
         raise NotImplementedError()
+
+    def on_launch(self, min_x, max_x):
+        #Set up plot
+        self.figure, self.ax = plt.subplots()
+        self.lines, = self.ax.plot([],[], 'go-')
+        #Autoscale on unknown axis and known lims on the other
+        self.ax.set_autoscaley_on(True)
+        #Other stuff
+        self.ax.grid()
+
+    def on_running(self, coordinates, currentPath):
+        #Update data (with the new _and_ the old points)
+        xdata = []
+        ydata = []
+        for i in range(len(currentPath)):
+            xdata.append(coordinates[currentPath[i]][0])
+            ydata.append(coordinates[currentPath[i]][1])
+        xdata.append(coordinates[currentPath[0]][0])
+        ydata.append(coordinates[currentPath[0]][1])
+        self.lines.set_xdata(xdata)
+        self.lines.set_ydata(ydata)
+        #Need both of these in order to rescale
+        self.ax.relim()
+        self.ax.autoscale_view()
+        #We need to draw *and* flush
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
 
 
 class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):

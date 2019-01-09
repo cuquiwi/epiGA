@@ -9,7 +9,7 @@ def load_problem_file(file_name):
     Arguments:
         file_name {str} -- Path to the file
     Returns:
-        matrix NxN -- Symetric matrix with the distances among cities.
+        matrix NxN, matrix Nx2 -- Symetric matrix with the distances among cities, matrix containing the coordinates.
     """
     coordinates = []
     with open(file_name, 'r') as file:
@@ -29,7 +29,7 @@ def load_problem_file(file_name):
                 coordinates[i] - coordinates[j]
             )
 
-    return distance_matrix
+    return distance_matrix, coordinates
 
 
 def load_solution_file(file_name):

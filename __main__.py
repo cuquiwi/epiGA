@@ -12,7 +12,7 @@ distances = [
 optimal_path = [0, 2, 3, 1]
 
 
-distances = load_problem_file('res/a280.tsp')
+distances, coordinates = load_problem_file('res/a280.tsp')
 optimal_path = load_solution_file('res/a280.opt.tour')
 
 objective_distance = 0.0
@@ -27,7 +27,7 @@ print('Objective distance is:', objective_distance)
 TSPGeneticAlgorithm(
     population_size=1000,
     mutation_rate=0.1,
-    max_epochs=50
-).call(distances)
+    max_epochs=1000
+).call(distances, coordinates, optimal_path)
 
 print('Objective distance is:', objective_distance)
