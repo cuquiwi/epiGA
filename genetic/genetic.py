@@ -34,7 +34,7 @@ class ITSPGeneticAlgorithm(object):
                 child = self.do_mutation(child)
                 new_population.append(child)
 
-            population = new_population
+            population = self.do_next_generation(population, new_population)
 
         return population
 
@@ -60,6 +60,9 @@ class ITSPGeneticAlgorithm(object):
         raise NotImplementedError()
 
     def do_mutation(self, individual):
+        raise NotImplementedError()
+
+    def do_next_generation(self, olders, newers):
         raise NotImplementedError()
 
 
@@ -164,3 +167,14 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
             end = randint(0, len(individual.path)-1)
             individual.path[origin], individual.path[end] = individual.path[end], individual.path[origin]
         return individual
+
+    def do_next_generation(self, olders, newers):
+        """
+        Performs the strategy to select the future generation.
+
+        Inputs:
+            - olders: old generation.
+            - newers: new generation.
+        """
+        #TODO: Implementar un poco de elitismo
+        return newers
