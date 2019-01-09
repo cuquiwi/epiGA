@@ -9,12 +9,12 @@ class TSPIndividual(object):
         self.distance = None
     
     def __repr__(self):
-        return f'<TSPIndividual({self.fitness}) {self.path}>'
+        return f'<TSPIndividual({self.fitness}, {self.distance}) {self.path}>'
 
 
 class ITSPGeneticAlgorithm(object):
 
-    def __init__(self, population_size=100, mutation_rate=.1,
+    def __init__(self, population_size=100, mutation_rate=.01,
                  max_epochs=10000):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -25,7 +25,7 @@ class ITSPGeneticAlgorithm(object):
 
         for _ in range(self.max_epochs):
             self.do_calculate_fitness(population, distance_matrix)
-            self.do_metric_stuff(population)
+            self.print_metric(population)
 
             new_population = []
             for _ in range(self.population_size):
@@ -38,8 +38,14 @@ class ITSPGeneticAlgorithm(object):
 
         return population
 
-    def do_metric_stuff(self, population):
-        raise NotImplementedError()
+    def print_metric(self, population):
+        fitness = 0
+        min_ind = None
+        for individual in population:
+            if individual.fitness >= fitness:
+                fitness = individual.distance
+                min_ind = individual
+        print(f'Best Individual is: {min_ind}')
 
     def do_initialize_population(self, n_cities):
         raise NotImplementedError()
@@ -83,13 +89,6 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
             individual.fitness = 1 / total_distance
             individual.distance = total_distance
         self.normalize_fitness(population)
-    
-    def do_metric_stuff(self, population):
-        min_distance = np.Infinity
-        for individual in population:
-            if individual.distance <= min_distance:
-                min_distance = individual.distance
-        print(f'Min distance is: {min_distance}')
 
     def normalize_fitness(self, population):
         total_fitness = sum([ind.fitness for ind in population])
@@ -160,7 +159,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
             TSPIndividual -- Mutated Individual
         """
 
-        if random() <= self.mutation_rate:
+        while random() <= self.mutation_rate:
             origin = randint(0, len(individual.path)-1)
             end = randint(0, len(individual.path)-1)
             individual.path[origin], individual.path[end] = individual.path[end], individual.path[origin]
