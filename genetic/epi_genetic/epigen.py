@@ -292,8 +292,7 @@ def apply_mechanisms(mechanisms, cell, epiProb):
                 #TODO: Hacer gen imprimting
                 pass
             elif mechanisms[i] == "position":
-                #TODO: Hacer position effect
-                pass
+                position_mechanism(cell, 0.4) # TODO: parametize the prob?
             elif mechanisms[i] == "inactivation":
                 #TODO: Hacer x-inactivation
                 pass
@@ -303,6 +302,35 @@ def apply_mechanisms(mechanisms, cell, epiProb):
             elif mechanisms[i] == "silencing":
                 #TODO: Hacer gene silencing
                 pass
+    return cell
+
+def position_mechanism(cell, probability):
+    """
+    For the genes that are collapsed change their position within a certain probability.
+    The position change does not take into account if the genes are in the same collapsed zone.
+
+    Inputs:
+        - Cell: to apply mechanisn
+        - probability: probability of applying the mechanism
+    Output:
+        The new modified cell
+    """
+    
+    #Get the indexes for genes that will be affected
+    affected_indexes = []
+    for i in range(cell.nucleosome):
+        if cell.nucleosome[i] == 1 & random.random() <= probability:
+            affected_indexes.append(i)
+
+    relocation = affected_indexes # TODO: Does it copy reference or value?
+    shuffle(relocation)
+    newsolution = cell.solution
+
+    #Change positions
+    for i in range(len(relocation)):
+        newsolution[affected_indexes[i]] = cell.solution[relocation[i]]
+    cell.solution = newsolution
+
     return cell
 
 def replacement(oldpop,  newpop):
