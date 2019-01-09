@@ -366,7 +366,10 @@ class EpigeneticAlgorithm(object):
             if cell.nucleosome[i] == 1 & random() <= probability:
                 affected_indexes.append(i)
 
-        relocation = affected_indexes # TODO: Does it copy reference or value?
+        relocation = []
+        for elem in affected_indexes:
+            relocation.append(elem)
+        
         shuffle(relocation)
         newsolution = cell.solution
 
