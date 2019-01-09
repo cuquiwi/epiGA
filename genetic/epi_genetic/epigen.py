@@ -216,7 +216,10 @@ class EpigeneticAlgorithm(object):
                 mapping[baseSolution[i]] = secondSolution[i]
             
         #Start the new solution as the baseSolution
-        newsolution = baseSolution
+        newsolution = []
+        for elem in baseSolution:
+            newsolution.append(elem)
+        
         for j in range(len(newsolution)):
             #If the chromosome is not bent, we must replace with second solution value
             if (not mask[j]):
