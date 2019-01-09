@@ -1,5 +1,9 @@
 from random import shuffle, random
 from cell import Cell
+import numpy as np
+
+
+distMatrix = [[1]] #TODO: Hacer global la matriz de distancias y llamarla asi.
 
 def epigen_alg(problemMatrix, individualsNb, cellsNb, epiProb, nucleoProb, nucleoRad, mechanisms, environment, max_epoch = 500):
     """
@@ -178,9 +182,60 @@ def collapse(nucleosome, radius, k):
         nucleosome[k+i] = 1
     return nucleosome
 
+def selectBestCell(individual):
+    #TODO:  Add description
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    return individual(np.argmax(fitness))
+
+def crossover(baseSolution, secondSolution, mask):
+    #TODO:  Add description
+    # TODO:  Implement Partially-mapped Crossover (PMX) 
+    # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
+    return baseSolution
+
+def removeWorstCell(individual, newCell):
+    """
+    Function that generates a new individual changing its worst cell
+    Inputs: 
+        - individual: List of Cells that form the base individual from 
+            which the new individual is formed
+        - newCell: The cell that is going to replace the worst cell of 
+            the received individual
+    Output:
+        New individual based in the received one with the newCell
+    """
+    newInd = []
+    for cell in individual:
+        newInd.append(cell)
+    fitness = list(map(lambda cell:cell.fitness, individual))
+    newInd.remove(individual[np.argmin(fitness)])
+    newInd.append(newCell)
+    return newInd
+    
+
 def nucleosome_reproduction(population):
-   #TODO
-    return population
+    """
+    Function that generates the new population based on nucleosome reproduction
+    Inputs: 
+        - population: list of individuals of the previous generation
+    Output: 
+        The list of children of the provious population
+    """
+    newPop = []
+    for i1 in population:
+       for i2 in population:
+           if (not (i1 == i2)):
+                bestCell1 = selectBestCell(i1)
+                bestCell2 = selectBestCell(i2)
+                newNucleosome = np.logical_or(bestCell1.nucleosome, bestCell2.nucleosome)
+                fatherBasedSolution = crossover(bestCell1.solution, bestCell2.solution, newNucleosome)
+                motherBasedSolution = crossover(bestCell2.solution, bestCell1.solution, newNucleosome)
+                newCellI1 = Cell(fatherBasedSolution, bestCell1.solution,bestCell2.solution,newNucleosome)
+                newCellI2 = Cell(motherBasedSolution, bestCell2.solution,bestCell1.solution,newNucleosome)
+                i1_child = removeWorstCell(i1, newCellI1)
+                i2_child = removeWorstCell(i2, newCellI2)
+                newPop.append(i1_child, i2_child)
+    return newPop
 
 def epigen_mechanism(population, mechanisms, epiProb):
     """
@@ -199,13 +254,56 @@ def epigen_mechanism(population, mechanisms, epiProb):
         for j in range(len(individual)):
             cells = individual[j]
             cells = apply_mechanisms(mechanisms, cells, epiProb)
+            evaluate_cell(cells, distMatrix)
             individual[j] = cells
         population[i] = individual
     return population
 
-def apply_mechanisms(mechanisms, cells, epiProb):
-    #TODO: Hacer los mecanismos
-    return cells
+def apply_mechanisms(mechanisms, cell, epiProb):
+    """
+    This function applies the epigenetic mechanisms to a given cell
+    with some probability.
+    Already implemented mechanisms:
+        - ...
+    Possible future implemented mechanisms:
+        - "imprinting"
+        - "reprogramming"
+        - "permutation"
+        - "position"
+        - "inactivation"
+        - "bookmarking"
+        - "silencing"
+    Inputs:
+        - mechanisms: List of mechanisms to be applied.
+        - cell: The cell in which we will apply a mechanism.
+        - epiProb: List of probabilities for every listed mechanism.
+    Output:
+        The new modified cell.
+    """
+    for i in range(len(mechanisms)):
+        if random() < epiProb[i]:
+            if mechanisms[i] == "imprinting":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "reprogramming":
+                #TODO: Hacer reprogramming
+                pass
+            elif mechanisms[i] == "permutation":
+                #TODO: Hacer gen imprimting
+                pass
+            elif mechanisms[i] == "position":
+                #TODO: Hacer position effect
+                pass
+            elif mechanisms[i] == "inactivation":
+                #TODO: Hacer x-inactivation
+                pass
+            elif mechanisms[i] == "bookmarking":
+                #TODO: Hacer bookmarking
+                pass
+            elif mechanisms[i] == "silencing":
+                #TODO: Hacer gene silencing
+                pass
+    return cell
 
 def replacement(oldpop,  newpop):
     #TODO
