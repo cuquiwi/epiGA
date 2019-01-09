@@ -41,9 +41,10 @@ class ITSPGeneticAlgorithm(object):
     def print_metric(self, population):
         fitness = 0
         min_ind = None
+        #min_ind = max(population, key=lambda x:x.fitness)
         for individual in population:
             if individual.fitness >= fitness:
-                fitness = individual.distance
+                fitness = individual.fitness
                 min_ind = individual
         print(f'Best Individual is: {min_ind}')
 
@@ -175,6 +176,11 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         Inputs:
             - olders: old generation.
             - newers: new generation.
+        Output:
+            Final population of the current epoch.
         """
         #TODO: Implementar un poco de elitismo
+        best_old = max(olders, key=lambda x:x.fitness)
+        i = randint(0,len(newers))
+        newers[i] = best_old
         return newers
