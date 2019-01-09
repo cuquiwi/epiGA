@@ -68,6 +68,19 @@ def evaluate_cell(cell, distMatrix):
     
     return fitness
 
+def evaluate_individual(individual):
+    """
+    Get the total fitness of the individual, the sum of the fitness of its cells.
+    Input:
+        - individual: Individual, represented by a list of cells
+    Return:
+        - fitness of the individual
+    """
+    fitness = 0
+    for cell in individual:
+        fitness+=cell.fitness
+    return fitness
+
 def init_population(individualsNb, cellsNb, distMatrix):
     """
     The initial population of the EpiGA.
@@ -95,13 +108,41 @@ def init_population(individualsNb, cellsNb, distMatrix):
 def selection(population):
     """
     Performs the population selection in the EpiGA.
+    Uses a binary tournament selection with no repetitions.
+    Returns half of the population
     Inputs:
         - population: the total population.
     Return:
-        THe selected subset of the total population.
+        The selected subset of the total population.
     """
-    #TODO: Binary tournment or roulette. Discuss why we have chosen a particular implementation.
-    return population
+    winners = []
+    shuffle(population)
+    i=0
+    while i+1<len(population):
+        if evaluate_individual(population[i]) > evaluate_individual(population[i+1]):
+            winners.append(population[i])
+        else:
+            winners.append(population[i+1])
+        i+=2
+    return winners
+
+def k_tournament_selection(pop, k=2):
+    """
+    Performs a tournament selection, by default a binary selection
+    Inputs:
+        - pop: The total population
+        - k: the number of individuals to compete, default is 2
+    Return:
+        The winner of the k-tournament
+    """
+    best = None
+    bestfit = 0
+    for i in range(1, k):
+        ind = pop[random(1, len(pop))]
+        if (best == None) or evaluate_individual(ind) > bestfit:
+            best = ind
+            bestfit = evaluate_individual(best)
+    return best
 
 def nucleosome_generation(population, prob, radius):
     """
@@ -153,7 +194,16 @@ def crossover(baseSolution, secondSolution, mask):
     return baseSolution
 
 def removeWorstCell(individual, newCell):
-    #TODO:  Add description
+    """
+    Function that generates a new individual changing its worst cell
+    Inputs: 
+        - individual: List of Cells that form the base individual from 
+            which the new individual is formed
+        - newCell: The cell that is going to replace the worst cell of 
+            the received individual
+    Output:
+        New individual based in the received one with the newCell
+    """
     newInd = []
     for cell in individual:
         newInd.append(cell)
@@ -164,7 +214,13 @@ def removeWorstCell(individual, newCell):
     
 
 def nucleosome_reproduction(population):
-    #TODO:  Add description
+    """
+    Function that generates the new population based on nucleosome reproduction
+    Inputs: 
+        - population: list of individuals of the previous generation
+    Output: 
+        The list of children of the provious population
+    """
     newPop = []
     for i1 in population:
        for i2 in population:
