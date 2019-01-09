@@ -252,7 +252,7 @@ class EpigeneticAlgorithm(object):
                     newPop.append(i1_child, i2_child)
         return newPop
 
-    def apply_mechanisms(mechanisms, cell, epiProb):
+    def apply_mechanisms(self, mechanisms, cell, epiProb):
         """
         This function applies the epigenetic mechanisms to a given cell
         with some probability.
@@ -261,7 +261,7 @@ class EpigeneticAlgorithm(object):
         Possible future implemented mechanisms:
             - "imprinting"
             - "reprogramming"
-            - "permutation"
+            - "paramutation"
             - "position"
             - "inactivation"
             - "bookmarking"
@@ -273,31 +273,31 @@ class EpigeneticAlgorithm(object):
         Output:
             The new modified cell.
         """
-        for i in range(len(mechanisms)):
-            if random() < epiProb[i]:
-                if mechanisms[i] == "imprinting":
+        for i in range(len(self.mechanisms)):
+            if random() < self.epiProb[i]:
+                if self.mechanisms[i] == "imprinting":
                     #TODO: Hacer gen imprimting
                     pass
-                elif mechanisms[i] == "reprogramming":
+                elif self.mechanisms[i] == "reprogramming":
                     #TODO: Hacer reprogramming
                     pass
-                elif mechanisms[i] == "permutation":
-                    #TODO: Hacer gen imprimting
+                elif self.mechanisms[i] == "paramutation":
+                    #TODO: Hacer paramutation
                     pass
-                elif mechanisms[i] == "position":
-                    position_mechanism(cell, 0.4) # TODO: parametize the prob?
-                elif mechanisms[i] == "inactivation":
+                elif self.mechanisms[i] == "position":
+                    self.position_mechanism(cell, 0.4) # TODO: parametize the prob?
+                elif self.mechanisms[i] == "inactivation":
                     #TODO: Hacer x-inactivation
                     pass
-                elif mechanisms[i] == "bookmarking":
+                elif self.mechanisms[i] == "bookmarking":
                     #TODO: Hacer bookmarking
                     pass
-                elif mechanisms[i] == "silencing":
+                elif self.mechanisms[i] == "silencing":
                     #TODO: Hacer gene silencing
                     pass
         return cell
 
-    def position_mechanism(cell, probability):
+    def position_mechanism(self, cell, probability):
         """
         For the genes that are collapsed change their position within a certain probability.
         The position change does not take into account if the genes are in the same collapsed zone.
@@ -312,7 +312,7 @@ class EpigeneticAlgorithm(object):
         #Get the indexes for genes that will be affected
         affected_indexes = []
         for i in range(cell.nucleosome):
-            if cell.nucleosome[i] == 1 & random.random() <= probability:
+            if cell.nucleosome[i] == 1 & random() <= probability:
                 affected_indexes.append(i)
 
         relocation = affected_indexes # TODO: Does it copy reference or value?
@@ -326,6 +326,6 @@ class EpigeneticAlgorithm(object):
 
         return cell
 
-    def replacement(oldpop,  newpop):
+    def replacement(self, oldpop,  newpop):
         #TODO
         return newpop
