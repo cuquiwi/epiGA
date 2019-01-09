@@ -252,7 +252,31 @@ class EpigeneticAlgorithm(object):
                     newPop.append(i1_child, i2_child)
         return newPop
 
-    def apply_mechanisms(self, mechanisms, cell, epiProb):
+    def epigen_mechanism(self, population):
+        """
+        This function applies to each cell of the population the epigenetic
+        mechanisms with its corresponding probabilities.
+        Inputs:
+            - population: the total population.
+            - mechanisms: A list of mechanisms that we will apply.
+            - epiProb: A list of probabilities corresponding to the previous
+                    specified mechanisms.
+        Output:
+            The new modified population.
+        """
+        for i in range(len(population)):
+            individual = population[i]
+            for j in range(len(individual)):
+                cell = individual[j]
+                cell = self.apply_mechanisms(cell)
+                self.evaluate_cell(cell)
+                #TODO: Creo que esta línea está demas porque todos los objetos en python se pasan por referencia. 
+                individual[j] = cell
+                #####################
+            population[i] = individual
+        return population
+
+    def apply_mechanisms(self, cell):
         """
         This function applies the epigenetic mechanisms to a given cell
         with some probability.
@@ -274,7 +298,7 @@ class EpigeneticAlgorithm(object):
             The new modified cell.
         """
         for i in range(len(self.mechanisms)):
-            if random() < self.epiProb[i]:
+            if random() < self.epi_probs[i]:
                 if self.mechanisms[i] == "imprinting":
                     #TODO: Hacer gen imprimting
                     pass
