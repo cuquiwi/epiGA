@@ -5,7 +5,7 @@ import numpy as np
 class EpigeneticAlgorithm(object):
 
     def __init__(self, individuals_number, cells_number, epi_probs,
-                 nucleo_prob, nucleo_rad, mechanisms, environment, max_epochs=500):
+                 nucleo_prob, nucleo_rad, mechanisms, environment, max_epochs=500, position_prob=0.4):
         """
         EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
         Inputs:
@@ -18,6 +18,7 @@ class EpigeneticAlgorithm(object):
                         in the same order as the epiProb list.
             environment: Environment rules
             max_epochs: Maximun number of epochs
+            position_prob: Probability for the position epigenetic mechanism
         """
         self.individuals_number = individuals_number
         self.cells_number = cells_number
@@ -27,6 +28,7 @@ class EpigeneticAlgorithm(object):
         self.mechanisms = mechanisms
         self.enviroment = environment
         self.max_epochs = max_epochs
+        self.position_prob = position_prob
 
     def call(self, distances_matrix):
         """Performs the actual algorithm taking into account the configuration 
@@ -339,7 +341,7 @@ class EpigeneticAlgorithm(object):
                     #TODO: Hacer paramutation
                     pass
                 elif self.mechanisms[i] == "position":
-                    self.position_mechanism(cell, 0.4) # TODO: parametize the prob?
+                    self.position_mechanism(cell, self.position_prob)
                 elif self.mechanisms[i] == "inactivation":
                     #TODO: Hacer x-inactivation
                     pass
