@@ -19,13 +19,16 @@ optimal_path, distance = load_solution_file(
 print('Objective distance is:', distance)
 
 EpigeneticAlgorithm(
-    individuals_number = 100,
-    cells_number = 10,
-    epi_probs = [0.8, 0.4],
-    nucleo_prob = 0.4,
-    position_prob=0.7,
-    nucleo_rad = 1,
-    mechanisms = ['position', 'imprinting'],
+    individuals_number=50,
+    cells_number=25,
+
+    nucleo_prob=0.02,
+
+    nucleo_rad=3,
+    mechanisms=['position', 'imprinting'],
+    epi_probs=[0.8, 0.4],
+    position_prob=.2,
+
     max_epochs=500
 ).call(coordinates, optimal_path)
 

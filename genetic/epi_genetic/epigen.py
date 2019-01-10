@@ -299,29 +299,28 @@ class EpigeneticAlgorithm(object):
         for _ in range(2 * self.individuals_number):
             i1 = self.roulette_selection(population)
             i2 = self.roulette_selection(population)
-            if (not (i1 == i2)):
-                bestCell1 = self.selectBestCell(i1)
-                bestCell2 = self.selectBestCell(i2)
-                newNucleosome = np.logical_or(
-                    bestCell1.nucleosome, bestCell2.nucleosome)
-                fatherBasedSolution = self.crossover(
-                    bestCell1.solution, bestCell2.solution, newNucleosome
-                )
-                motherBasedSolution = self.crossover(
-                    bestCell2.solution, bestCell1.solution, newNucleosome
-                )
-                newCellI1 = Cell(
-                    fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome
-                )
-                newCellI2 = Cell(
-                    motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome
-                )
-                self.evaluate_cell(newCellI1)
-                self.evaluate_cell(newCellI2)
-                i1_child = self.removeWorstCell(i1, newCellI1)
-                i2_child = self.removeWorstCell(i2, newCellI2)
-                newPop.append(i1_child)
-                newPop.append(i2_child)
+            bestCell1 = self.selectBestCell(i1)
+            bestCell2 = self.selectBestCell(i2)
+            newNucleosome = np.logical_or(
+                bestCell1.nucleosome, bestCell2.nucleosome)
+            fatherBasedSolution = self.crossover(
+                bestCell1.solution, bestCell2.solution, newNucleosome
+            )
+            motherBasedSolution = self.crossover(
+                bestCell2.solution, bestCell1.solution, newNucleosome
+            )
+            newCellI1 = Cell(
+                fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome
+            )
+            newCellI2 = Cell(
+                motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome
+            )
+            self.evaluate_cell(newCellI1)
+            self.evaluate_cell(newCellI2)
+            i1_child = self.removeWorstCell(i1, newCellI1)
+            i2_child = self.removeWorstCell(i2, newCellI2)
+            newPop.append(i1_child)
+            newPop.append(i2_child)
         return newPop
 
     def epigen_mechanism(self, population):
@@ -571,7 +570,7 @@ class EpigeneticAlgorithm(object):
         # TODO: Hacer la funcion print del mejor individual
         #print(f'Best Individual is: {min_ind}')
         self.on_running(coordinates, min_cell.solution, optimum_path,
-                        "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
+                        "Iteration: "+str(iteration) + " Best Path: " + str(int(fitness)))
         self.on_running_fitness(population, iteration, fitness,
                                 "Distances of the population")
 
