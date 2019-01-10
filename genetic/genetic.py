@@ -217,6 +217,6 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         """
         shuffle(newers)
         number_of_elite_ind = int(len(olders) * self.elitism_rate)
-        best_old = sorted(olders, key=lambda x:x.fitness)[:number_of_elite_ind]
+        best_old = sorted(olders, key=lambda x:x.fitness, reverse=True)[:number_of_elite_ind]
         newers[:number_of_elite_ind] = best_old
         return newers
