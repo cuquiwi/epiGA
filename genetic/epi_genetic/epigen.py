@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 class EpigeneticAlgorithm(object):
 
     def __init__(self, individuals_number, cells_number, epi_probs,
-                 nucleo_prob, nucleo_rad, mechanisms, max_epochs=500):
+                 nucleo_prob, nucleo_rad, mechanisms, position_prob=0.4,
+                 max_epochs=500):
         """
         EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
         Inputs:
