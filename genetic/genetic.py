@@ -1,4 +1,4 @@
-from random import sample, randint, random
+from random import sample, randint, random, shuffle
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -15,11 +15,12 @@ class TSPIndividual(object):
 
 class ITSPGeneticAlgorithm(object):
 
-    def __init__(self, population_size=100, mutation_rate=.01,
+    def __init__(self, population_size=100, mutation_rate=.01, elitism_rate=0.2,
                  max_epochs=10000):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.max_epochs = max_epochs
+        self.elitism_rate = elitism_rate
 
     def call(self, distance_matrix, coordinates, optimal_path):
         population = self.do_initialize_population(len(distance_matrix))
@@ -214,8 +215,8 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         Output:
             Final population of the current epoch.
         """
-        #TODO: Implementar un poco de elitismo
-        best_old = max(olders, key=lambda x:x.fitness)
-        i = randint(0,len(newers))
-        newers[i] = best_old
+        shuffle(newers)
+        number_of_elite_ind = int(len(olders) * self.elitism_rate)
+        best_old = sorted(olders, key=lambda x:x.fitness)[:number_of_elite_ind]
+        newers[:number_of_elite_ind] = best_old
         return newers
