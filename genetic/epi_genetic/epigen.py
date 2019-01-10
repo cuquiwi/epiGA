@@ -101,7 +101,7 @@ class EpigeneticAlgorithm(object):
         solution = cell.solution
         fitness = 0
         for i in range(1, len(solution)):
-            fitness += self.distances_matrix[i-1][i]
+            fitness += self.distances_matrix[cell.solution[i-1]][cell.solution[i]]
         cell.setfitness(fitness)
 
         return fitness
@@ -114,10 +114,9 @@ class EpigeneticAlgorithm(object):
         Return:
             - fitness of the individual
         """
-        fitness = 0
-        for cell in individual:
-            fitness += cell.fitness
-        return fitness
+        cell_fitness = list(map(lambda cell: cell.fitness, individual))
+
+        return np.max(cell_fitness)
 
     def init_population(self):
         """
@@ -323,15 +322,9 @@ class EpigeneticAlgorithm(object):
         Output:
             The new modified population.
         """
-        for i in range(len(population)):
-            individual = population[i]
-            for j in range(len(individual)):
-                cell = individual[j]
-                cell = self.apply_mechanisms(cell)
-                # TODO: Creo que esta línea está demas porque todos los objetos en python se pasan por referencia.
-                individual[j] = cell
-                #####################
-            population[i] = individual
+        for individual in population:
+            for cell in individual:
+                self.apply_mechanisms(cell)
         return population
 
     def apply_mechanisms(self, cell):
@@ -421,7 +414,7 @@ class EpigeneticAlgorithm(object):
         TODO: Change method
         """
         newpop = sorted(
-            [*oldpop, *newpop], key=lambda x: self.evaluate_individual(x), reverse=True
+            [*oldpop, *newpop], key=lambda x: self.evaluate_individual(x)
         )
         return newpop[:self.individuals_number]
 
@@ -494,6 +487,7 @@ class EpigeneticAlgorithm(object):
             if pivot_fitness <= fitness:
                 fitness = pivot_fitness
                 cell_fitness = list(map(lambda cell: cell.fitness,individual))
+                print(f"Estas son las fitness de las celulas:{cell_fitness}")
                 min_cell = individual[np.argmin(cell_fitness)]
 
         # TODO: Hacer la funcion print del mejor individual
@@ -503,10 +497,17 @@ class EpigeneticAlgorithm(object):
 
 
     def roulette_selection(self, population):
-        max = sum(self.evaluate_individual(individual) for individual in population)
+        individual_fitness = [self.evaluate_individual(individual) for individual in population]
+        minim_fitness = np.min(individual_fitness)
+        maxim_fitness = np.max(individual_fitness)
+        media = np.floor((minim_fitness+maxim_fitness)/2)
+        translated = list(map(lambda x: x-media, individual_fitness))
+        inverted = list(map(lambda x: -x,translated))
+        reverted = list(map(lambda x: x+media, inverted))
+        max = sum(reverted)
         pick = uniform(0, max)
         current = 0
-        for individual in population:
-            current += self.evaluate_individual(individual)
+        for i in range(len(population)):
+            current += reverted[i]
             if current > pick:
-                return individual
+                return population[i]
