@@ -172,8 +172,11 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         path_1 = parents[0].path
         path_2 = parents[1].path
 
-        ini = randint(0, len(path_1) - 1)
-        end = randint(ini, len(path_1))
+        rand1 = randint(0, len(path_1))
+        rand2 = randint(0, len(path_1))
+
+        ini = min(rand1, rand2)
+        end = max(rand1, rand2)
 
         new_path = [-1 for _ in range(len(path_2))]
         new_path[ini:end] = path_1[ini:end]
@@ -216,6 +219,5 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         """
         #TODO: Implementar un poco de elitismo
         best_old = max(olders, key=lambda x:x.fitness)
-        i = randint(0,len(newers))
-        newers[i] = best_old
+        newers[randint(1,len(newers)-1)] = best_old
         return newers
