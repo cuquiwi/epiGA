@@ -30,9 +30,12 @@ class ITSPGeneticAlgorithm(object):
 
         self.on_launch(0, 10)
 
+        i=0
+
         for _ in range(self.max_epochs):
             self.do_calculate_fitness(population, distance_matrix)
-            self.print_metric(population, coordinates, optimal_path)
+            self.print_metric(population, coordinates, optimal_path, i)
+            i = i+1
 
             new_population = []
             for _ in range(self.population_size):
@@ -54,7 +57,7 @@ class ITSPGeneticAlgorithm(object):
                 )
         return distance_matrix
 
-    def print_metric(self, population, coordinates, optimal_path):
+    def print_metric(self, population, coordinates, optimal_path, iteration):
         fitness = 0
         min_ind = None
         #min_ind = max(population, key=lambda x:x.fitness)
@@ -64,7 +67,7 @@ class ITSPGeneticAlgorithm(object):
                 min_ind = individual
         print(f'Best Individual is: {min_ind}')
 
-        self.on_running(coordinates, min_ind.path)
+        self.on_running(coordinates, min_ind.path, "Iteration: "+str(iteration) + " Best Path: " + str(min_ind.distance))
 
 
     def do_initialize_population(self, n_cities):
@@ -94,7 +97,7 @@ class ITSPGeneticAlgorithm(object):
         #Other stuff
         self.ax.grid()
 
-    def on_running(self, coordinates, currentPath):
+    def on_running(self, coordinates, currentPath, title_string):
         #Update data (with the new _and_ the old points)
         xdata = []
         ydata = []
@@ -109,6 +112,7 @@ class ITSPGeneticAlgorithm(object):
         self.ax.relim()
         self.ax.autoscale_view()
         #We need to draw *and* flush
+        plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
