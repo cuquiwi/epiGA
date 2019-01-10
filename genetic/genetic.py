@@ -21,6 +21,8 @@ class ITSPGeneticAlgorithm(object):
         self.mutation_rate = mutation_rate
         self.max_epochs = max_epochs
         self.elitism_rate = elitism_rate
+        self.xdata_fitness = []
+        self.ydata_fitness = []
 
     def call(self, coordinates, optimal_path):
         distance_matrix = self.calculate_distances(coordinates)
@@ -68,6 +70,7 @@ class ITSPGeneticAlgorithm(object):
         print(f'Best Individual is: {min_ind}')
 
         self.on_running(coordinates, min_ind.path, "Iteration: "+str(iteration) + " Best Path: " + str(min_ind.distance))
+        self.on_running_fitness(population, iteration, "Distances of the population")
 
 
     def do_initialize_population(self, n_cities):
@@ -90,12 +93,15 @@ class ITSPGeneticAlgorithm(object):
 
     def on_launch(self, min_x, max_x):
         #Set up plot
-        self.figure, self.ax = plt.subplots()
+        self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
         self.lines, = self.ax.plot([],[], 'go-')
+        self.lines2, = self.ax2.plot([],[], 'b.')
         #Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
+        self.ax2.set_autoscaley_on(True)
         #Other stuff
         self.ax.grid()
+        self.ax2.grid()
 
     def on_running(self, coordinates, currentPath, title_string):
         #Update data (with the new _and_ the old points)
@@ -109,12 +115,29 @@ class ITSPGeneticAlgorithm(object):
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
         #Need both of these in order to rescale
+        self.ax.set_title(title_string)
         self.ax.relim()
         self.ax.autoscale_view()
         #We need to draw *and* flush
-        plt.title(title_string)
+        #plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
+
+    def on_running_fitness(self, population, iteration, title_string):
+        #Update data (with the new _and_ the old points)
+        for i in range(len(population)):
+            self.xdata_fitness.append(iteration)
+            self.ydata_fitness.append(population[i].distance)
+        self.lines2.set_xdata(self.xdata_fitness)
+        self.lines2.set_ydata(self.ydata_fitness)
+        #Need both of these in order to rescale
+        self.ax2.set_title(title_string)
+        self.ax2.relim()
+        self.ax2.autoscale_view()
+        #We need to draw *and* flush
+        #plt.title(title_string)
+        self.figure.canvas.draw()
+        #self.figure2.canvas.flush_events()
 
 
 class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):

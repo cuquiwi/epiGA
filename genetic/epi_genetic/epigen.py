@@ -31,6 +31,8 @@ class EpigeneticAlgorithm(object):
         self.mechanisms = mechanisms
         self.max_epochs = max_epochs
         self.position_prob = position_prob
+        self.xdata_fitness = []
+        self.ydata_fitness = []
 
     def call(self, coordinates):
         """Performs the actual algorithm taking into account the configuration 
@@ -51,14 +53,14 @@ class EpigeneticAlgorithm(object):
         termination_condition = False
         while not termination_condition:
 
-            self.print_metric(population, coordinates)
+            self.print_metric(population, coordinates, i)
 
             newpop = self.selection(population)
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
             newpop = self.epigen_mechanism(newpop)
 
-            population = self.replacement(population[i], newpop)
+            population = self.replacement(population, newpop)
             termination_condition = self.termination(i)
             i += 1
             print('.')
@@ -127,7 +129,7 @@ class EpigeneticAlgorithm(object):
         for _ in range(self.individuals_number):
             individual = []
             for j in range(self.cells_number):
-                solution = [k+1 for k in range(len(self.distances_matrix))]
+                solution = [k for k in range(len(self.distances_matrix))]
                 shuffle(solution)
                 cell = Cell(solution)
                 self.evaluate_cell(cell)
@@ -421,18 +423,23 @@ class EpigeneticAlgorithm(object):
         return newpop[:self.individuals_number]
 
     def on_launch(self):
-        # Set up plot
-        self.figure, self.ax = plt.subplots()
-        self.lines, = self.ax.plot([], [], 'go-')
-        # Autoscale on unknown axis and known lims on the other
+        #Set up plot
+        self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
+        self.lines, = self.ax.plot([],[], 'go-')
+        self.lines2, = self.ax2.plot([],[], 'b.')
+        #Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
-        # Other stuff
+        self.ax2.set_autoscaley_on(True)
+        #Other stuff
         self.ax.grid()
+        self.ax2.grid()
 
-    def on_running(self, coordinates, currentPath):
-        # Update data (with the new _and_ the old points)
+    def on_running(self, coordinates, currentPath, title_string):
+        #Update data (with the new _and_ the old points)
         xdata = []
         ydata = []
+        #print(currentPath)
+        #print(coordinates)
         for i in range(len(currentPath)):
             xdata.append(coordinates[currentPath[i]][0])
             ydata.append(coordinates[currentPath[i]][1])
@@ -440,26 +447,46 @@ class EpigeneticAlgorithm(object):
         ydata.append(coordinates[currentPath[0]][1])
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
-        # Need both of these in order to rescale
+        #Need both of these in order to rescale
+        self.ax.set_title(title_string)
         self.ax.relim()
         self.ax.autoscale_view()
-        # We need to draw *and* flush
+        #We need to draw *and* flush
+        #plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def print_metric(self, population, coordinates):
-        fitness = 0
-        min_ind = None
+    def on_running_fitness(self, population, iteration, title_string):
+        #Update data (with the new _and_ the old points)
+        for i in range(len(population)):
+            self.xdata_fitness.append(iteration)
+            self.ydata_fitness.append(self.evaluate_individual(population[i])/self.cells_number)
+        self.lines2.set_xdata(self.xdata_fitness)
+        self.lines2.set_ydata(self.ydata_fitness)
+        #Need both of these in order to rescale
+        self.ax2.set_title(title_string)
+        self.ax2.relim()
+        self.ax2.autoscale_view()
+        #We need to draw *and* flush
+        #plt.title(title_string)
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+    def print_metric(self, population, coordinates, iteration):
+        fitness = 99999999
+        min_cell = None
         #min_ind = max(population, key=lambda x:x.fitness)
         for individual in population:
-            for cell in individual:
-                if cell.fitness >= fitness:
-                    fitness = cell.fitness
-                    min_ind = cell
+            pivot_fitness = self.evaluate_individual(individual)
+            if pivot_fitness <= fitness:
+                fitness = pivot_fitness
+                cell_fitness = list(map(lambda cell: cell.fitness,individual))
+                min_cell = individual[np.argmin(cell_fitness)]
+
         # TODO: Hacer la funcion print del mejor individual
         #print(f'Best Individual is: {min_ind}')
-
-        self.on_running(coordinates, min_ind.path)
+        self.on_running(coordinates, min_cell.solution, "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
+        self.on_running_fitness(population, iteration, "Distances of the population")
 
 
     def roulette_selection(self, population):
