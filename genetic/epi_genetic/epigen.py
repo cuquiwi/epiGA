@@ -374,7 +374,7 @@ class EpigeneticAlgorithm(object):
             relocation.append(elem)
         
         shuffle(relocation)
-        newsolution = cell.solution
+        newsolution = [a for a in cell.solution]
 
         #Change positions
         for i in range(len(relocation)):
