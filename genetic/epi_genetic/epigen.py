@@ -102,7 +102,8 @@ class EpigeneticAlgorithm(object):
         solution = cell.solution
         fitness = 0
         for i in range(1, len(solution)):
-            fitness += self.distances_matrix[cell.solution[i-1]][cell.solution[i]]
+            fitness += self.distances_matrix[cell.solution[i-1]
+                                             ][cell.solution[i]]
         cell.setfitness(fitness)
 
         return fitness
@@ -216,10 +217,10 @@ class EpigeneticAlgorithm(object):
 
     def selectBestCell(self, individual):
         """Selects the best cell inside the individual
-        
+
         Arguments:
             individual {List of Cells} -- Individual to look in
-        
+
         Returns:
             Cell -- The best cell of the individual
         """
@@ -254,10 +255,9 @@ class EpigeneticAlgorithm(object):
             if (not mask[j]):
                 city = secondSolution[j]
                 # However, if it is going to be a repeated value, we use the generated map
-                if (city in mapping):
-                    newsolution[j] = mapping[city]
-                else:
-                    newsolution[j] = city
+                while (city in mapping):
+                    city = mapping[city]
+                newsolution[j] = city
 
         # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
 
@@ -413,6 +413,7 @@ class EpigeneticAlgorithm(object):
         # Change positions
         for i in range(len(relocation)):
             newsolution[affected_indexes[i]] = cell.solution[relocation[i]]
+
         cell.solution = newsolution
 
         return cell
@@ -428,20 +429,20 @@ class EpigeneticAlgorithm(object):
         return newpop[:self.individuals_number]
 
     def on_launch(self):
-        #Set up plot
+        # Set up plot
         self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
-        self.lines, = self.ax.plot([],[], 'go-')
-        self.lines_optimum, = self.ax.plot([],[], 'ro-.', alpha=0.5)
-        self.lines2, = self.ax2.plot([],[], 'b.', alpha=0.2)
-        #Autoscale on unknown axis and known lims on the other
+        self.lines, = self.ax.plot([], [], 'go-')
+        self.lines_optimum, = self.ax.plot([], [], 'ro-.', alpha=0.5)
+        self.lines2, = self.ax2.plot([], [], 'b.', alpha=0.2)
+        # Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         self.ax2.set_autoscaley_on(True)
-        #Other stuff
+        # Other stuff
         self.ax.grid()
         self.ax2.grid()
 
     def on_running(self, coordinates, currentPath, optimum_path, title_string):
-        #Update data (with the new _and_ the old points)
+        # Update data (with the new _and_ the old points)
         xdata = []
         ydata = []
         xdata_opt = []
@@ -462,28 +463,29 @@ class EpigeneticAlgorithm(object):
         ydata_opt.append(coordinates[optimum_path[0]][1])
         self.lines_optimum.set_xdata(xdata_opt)
         self.lines_optimum.set_ydata(ydata_opt)
-        #Need both of these in order to rescale
+        # Need both of these in order to rescale
         self.ax.set_title(title_string)
         self.ax.relim()
         self.ax.autoscale_view()
-        #We need to draw *and* flush
-        #plt.title(title_string)
+        # We need to draw *and* flush
+        # plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
     def on_running_fitness(self, population, iteration, title_string):
-        #Update data (with the new _and_ the old points)
+        # Update data (with the new _and_ the old points)
         for i in range(len(population)):
             self.xdata_fitness.append(iteration)
-            self.ydata_fitness.append(self.evaluate_individual(population[i])/self.cells_number)
+            self.ydata_fitness.append(self.evaluate_individual(
+                population[i])/self.cells_number)
         self.lines2.set_xdata(self.xdata_fitness)
         self.lines2.set_ydata(self.ydata_fitness)
-        #Need both of these in order to rescale
+        # Need both of these in order to rescale
         self.ax2.set_title(title_string)
         self.ax2.relim()
         self.ax2.autoscale_view()
-        #We need to draw *and* flush
-        #plt.title(title_string)
+        # We need to draw *and* flush
+        # plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
@@ -495,22 +497,25 @@ class EpigeneticAlgorithm(object):
             pivot_fitness = self.evaluate_individual(individual)
             if pivot_fitness <= fitness:
                 fitness = pivot_fitness
-                cell_fitness = list(map(lambda cell: cell.fitness,individual))
+                cell_fitness = list(map(lambda cell: cell.fitness, individual))
                 print(f"Estas son las fitness de las celulas:{cell_fitness}")
                 min_cell = individual[np.argmin(cell_fitness)]
 
         # TODO: Hacer la funcion print del mejor individual
         #print(f'Best Individual is: {min_ind}')
-        self.on_running(coordinates, min_cell.solution, optimum_path, "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
-        self.on_running_fitness(population, iteration, "Distances of the population")
+        self.on_running(coordinates, min_cell.solution, optimum_path,
+                        "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
+        self.on_running_fitness(population, iteration,
+                                "Distances of the population")
 
     def roulette_selection(self, population):
-        individual_fitness = [self.evaluate_individual(individual) for individual in population]
+        individual_fitness = [self.evaluate_individual(
+            individual) for individual in population]
         minim_fitness = np.min(individual_fitness)
         maxim_fitness = np.max(individual_fitness)
         media = np.floor((minim_fitness+maxim_fitness)/2)
         translated = list(map(lambda x: x-media, individual_fitness))
-        inverted = list(map(lambda x: -x,translated))
+        inverted = list(map(lambda x: -x, translated))
         reverted = list(map(lambda x: x+media, inverted))
         max = sum(reverted)
         pick = uniform(0, max)
