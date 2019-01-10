@@ -183,8 +183,11 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         path_1 = parents[0].path
         path_2 = parents[1].path
 
-        ini = randint(0, len(path_1) - 1)
-        end = randint(ini, len(path_1))
+        rand1 = randint(0, len(path_1))
+        rand2 = randint(0, len(path_1))
+
+        ini = min(rand1, rand2)
+        end = max(rand1, rand2)
 
         new_path = [-1 for _ in range(len(path_2))]
         new_path[ini:end] = path_1[ini:end]
@@ -225,8 +228,14 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         Output:
             Final population of the current epoch.
         """
+<<<<<<< HEAD
+        #TODO: Implementar un poco de elitismo
+        best_old = max(olders, key=lambda x:x.fitness)
+        newers[randint(1,len(newers)-1)] = best_old
+=======
         shuffle(newers)
         number_of_elite_ind = int(len(olders) * self.elitism_rate)
         best_old = sorted(olders, key=lambda x:x.fitness, reverse=True)[:number_of_elite_ind]
         newers[:number_of_elite_ind] = best_old
+>>>>>>> 5bdc66eeb607ad5c01d9d997cce5c596897683a3
         return newers
