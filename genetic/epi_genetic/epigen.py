@@ -414,9 +414,12 @@ class EpigeneticAlgorithm(object):
         return cell
 
     def replacement(self, oldpop,  newpop):
-        # TODO
+        """
+        Get the best of the two populations. Pure elitism used.
+        TODO: Change method
+        """
         newpop = sorted(
-            newpop, key=lambda x: self.evaluate_individual(x), reverse=True
+            [*oldpop, *newpop], key=lambda x: self.evaluate_individual(x), reverse=True
         )
         return newpop[:self.individuals_number]
 
