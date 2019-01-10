@@ -1,6 +1,7 @@
 from random import shuffle, random
 from cell import Cell
 import numpy as np
+import matplotlib.pyplot as plt
 
 class EpigeneticAlgorithm(object):
 
@@ -39,11 +40,17 @@ class EpigeneticAlgorithm(object):
 
         self.distances_matrix = distances_matrix
 
+        plt.ion()
+        self.on_launch()
+
         population = self.init_population()
         aux_population = []
         i = 0
         termination_condition = False
         while not termination_condition:
+
+            self.print_metric(population, coordinates)
+
             newpop = self.selection(population[i])
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
@@ -386,3 +393,44 @@ class EpigeneticAlgorithm(object):
     def replacement(self, oldpop,  newpop):
         #TODO
         return newpop
+    
+    def on_launch(self):
+        #Set up plot
+        self.figure, self.ax = plt.subplots()
+        self.lines, = self.ax.plot([],[], 'go-')
+        #Autoscale on unknown axis and known lims on the other
+        self.ax.set_autoscaley_on(True)
+        #Other stuff
+        self.ax.grid()
+
+    def on_running(self, coordinates, currentPath):
+        #Update data (with the new _and_ the old points)
+        xdata = []
+        ydata = []
+        for i in range(len(currentPath)):
+            xdata.append(coordinates[currentPath[i]][0])
+            ydata.append(coordinates[currentPath[i]][1])
+        xdata.append(coordinates[currentPath[0]][0])
+        ydata.append(coordinates[currentPath[0]][1])
+        self.lines.set_xdata(xdata)
+        self.lines.set_ydata(ydata)
+        #Need both of these in order to rescale
+        self.ax.relim()
+        self.ax.autoscale_view()
+        #We need to draw *and* flush
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+    def print_metric(self, population, coordinates):
+        fitness = 0
+        min_ind = None
+        #min_ind = max(population, key=lambda x:x.fitness)
+        for individual in population:
+            for cell in individual:
+                if cell.fitness >= fitness:
+                    fitness = cell.fitness
+                    min_ind = cell
+        #TODO: Hacer la funcion print del mejor individual
+        #print(f'Best Individual is: {min_ind}')
+
+        self.on_running(coordinates, min_ind.path)
