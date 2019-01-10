@@ -1,4 +1,4 @@
-from genetic.genetic import TSPGeneticAlgorithm
+from genetic.epi_genetic import EpigeneticAlgorithm
 import numpy as np
 from data_loader import load_solution_file, load_problem_file
 
@@ -13,15 +13,19 @@ optimal_path = [0, 2, 3, 1]
 
 
 coordinates = load_problem_file('res/berlin52.tsp')
-optimal_path, distance = load_solution_file('res/berlin52.opt.tour', coordinates)
+optimal_path, distance = load_solution_file(
+    'res/berlin52.opt.tour', coordinates)
 
 print('Objective distance is:', distance)
 
-TSPGeneticAlgorithm(
-    population_size=500,
-    mutation_rate=0.5,
-    elitism_rate=0.2,
-    max_epochs=1000
-).call(coordinates, optimal_path)
+EpigeneticAlgorithm(
+    individuals_number = 100,
+    cells_number = 50,
+    epi_probs = [0.3],
+    nucleo_prob = 0.3,
+    nucleo_rad = 4,
+    mechanisms = ['position'],
+    max_epochs=500
+).call(coordinates)
 
 print('Objective distance is:', distance)

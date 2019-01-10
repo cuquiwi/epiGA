@@ -1,1 +1,1 @@
-from .epigen import epigen_alg
+from .epigen import EpigeneticAlgorithm

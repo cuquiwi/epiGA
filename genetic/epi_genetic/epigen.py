@@ -1,11 +1,12 @@
 from random import shuffle, random
-from cell import Cell
+from .cell import Cell
 import numpy as np
+
 
 class EpigeneticAlgorithm(object):
 
     def __init__(self, individuals_number, cells_number, epi_probs,
-                 nucleo_prob, nucleo_rad, mechanisms, environment, max_epochs=500):
+                 nucleo_prob, nucleo_rad, mechanisms, max_epochs=500):
         """
         EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
         Inputs:
@@ -25,34 +26,41 @@ class EpigeneticAlgorithm(object):
         self.nucleo_prob = nucleo_prob
         self.nucleo_rad = nucleo_rad
         self.mechanisms = mechanisms
-        self.enviroment = environment
         self.max_epochs = max_epochs
 
-    def call(self, distances_matrix):
+    def call(self, coordinates):
         """Performs the actual algorithm taking into account the configuration 
         provided in the initialization and the distances matrix provided here
-        
+
         Arguments:
             distances_matrix {Matrix NxN} -- Matrix containing the distances 
                                         between cities
         """
 
-        self.distances_matrix = distances_matrix
+        self.distances_matrix = self.calculate_distances(coordinates)
 
         population = self.init_population()
-        aux_population = []
         i = 0
         termination_condition = False
         while not termination_condition:
-            newpop = self.selection(population[i])
+            newpop = self.selection(population)
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
             newpop = self.epigen_mechanism(newpop)
 
-            aux_population.append(newpop)
-            population.append(self.replacement(population[i], newpop))
+            population = self.replacement(population[i], newpop)
             termination_condition = self.termination(i)
-            i = i+1
+            i += 1
+            print('.')
+
+    def calculate_distances(self, coordinates):
+        distance_matrix = np.zeros((len(coordinates), len(coordinates)))
+        for i in range(len(coordinates)):
+            for j in range(len(coordinates)):
+                distance_matrix[i][j] = np.linalg.norm(
+                    coordinates[i] - coordinates[j]
+                )
+        return distance_matrix
 
     def termination(self, i):
         """
@@ -106,7 +114,7 @@ class EpigeneticAlgorithm(object):
             A list of cell elements representing the initial population.
         """
         population = []
-        for i in range(self.individuals_number):
+        for _ in range(self.individuals_number):
             individual = []
             for j in range(self.cells_number):
                 solution = [k+1 for k in range(len(self.distances_matrix))]
@@ -171,11 +179,11 @@ class EpigeneticAlgorithm(object):
             individual = population[i]
             for j in range(len(individual)):
                 cells = individual[j]
-                n = cells.mask
+                n = cells.nucleosome[:]
                 for k in range(len(n)):
                     if random() < self.nucleo_prob:
                         n = self.collapse(n, k)
-                cells.mask = n
+                cells.nucleosome = n
                 individual[j] = cells
             population[i] = individual
         return population
@@ -190,13 +198,14 @@ class EpigeneticAlgorithm(object):
             The new modified nucleosome.
         """
         for i in range(-self.nucleo_rad, self.nucleo_rad+1, 1):
-            nucleosome[k+i] = 1
+            if (k+i in range(len(nucleosome))):
+                nucleosome[k+i] = True
         return nucleosome
 
     def selectBestCell(self, individual):
         # TODO:  Add description
         fitness = list(map(lambda cell: cell.fitness, individual))
-        return individual(np.argmax(fitness))
+        return individual[np.argmax(fitness)]
 
     def crossover(self, baseSolution, secondSolution, mask):
         """
@@ -208,28 +217,28 @@ class EpigeneticAlgorithm(object):
             - mask: Defines the areas in which the chromosome is bent (i.e. the 
             places that are going to be passed on to the next generation)
         """
-        #Define mask for the substitution of values so that they are not repeated
+        # Define mask for the substitution of values so that they are not repeated
         mapping = {}
         for i in range(len(mask)):
-            #The mask uses values from the bent area of the base solution
+            # The mask uses values from the bent area of the base solution
             if (mask[i]):
                 mapping[baseSolution[i]] = secondSolution[i]
-            
-        #Start the new solution as the baseSolution
+
+        # Start the new solution as the baseSolution
         newsolution = []
         for elem in baseSolution:
             newsolution.append(elem)
-        
+
         for j in range(len(newsolution)):
-            #If the chromosome is not bent, we must replace with second solution value
+            # If the chromosome is not bent, we must replace with second solution value
             if (not mask[j]):
                 city = secondSolution[j]
-                #However, if it is going to be a repeated value, we use the generated map
+                # However, if it is going to be a repeated value, we use the generated map
                 if (city in mapping):
                     newsolution[j] = mapping[city]
                 else:
                     newsolution[j] = city
-            
+
         # https://www.researchgate.net/publication/226665831_Genetic_Algorithms_for_the_Travelling_Salesman_Problem_A_Review_of_Representations_and_Operators
 
         return newsolution
@@ -270,16 +279,23 @@ class EpigeneticAlgorithm(object):
                     newNucleosome = np.logical_or(
                         bestCell1.nucleosome, bestCell2.nucleosome)
                     fatherBasedSolution = self.crossover(
-                        bestCell1.solution, bestCell2.solution, newNucleosome)
+                        bestCell1.solution, bestCell2.solution, newNucleosome
+                    )
                     motherBasedSolution = self.crossover(
-                        bestCell2.solution, bestCell1.solution, newNucleosome)
+                        bestCell2.solution, bestCell1.solution, newNucleosome
+                    )
                     newCellI1 = Cell(
-                        fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome)
+                        fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome
+                    )
                     newCellI2 = Cell(
-                        motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome)
+                        motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome
+                    )
+                    self.evaluate_cell(newCellI1)
+                    self.evaluate_cell(newCellI2)
                     i1_child = self.removeWorstCell(i1, newCellI1)
                     i2_child = self.removeWorstCell(i2, newCellI2)
-                    newPop.append(i1_child, i2_child)
+                    newPop.append(i1_child)
+                    newPop.append(i2_child)
         return newPop
 
     def epigen_mechanism(self, population):
@@ -299,8 +315,7 @@ class EpigeneticAlgorithm(object):
             for j in range(len(individual)):
                 cell = individual[j]
                 cell = self.apply_mechanisms(cell)
-                self.evaluate_cell(cell)
-                #TODO: Creo que esta línea está demas porque todos los objetos en python se pasan por referencia. 
+                # TODO: Creo que esta línea está demas porque todos los objetos en python se pasan por referencia.
                 individual[j] = cell
                 #####################
             population[i] = individual
@@ -327,28 +342,33 @@ class EpigeneticAlgorithm(object):
         Output:
             The new modified cell.
         """
+        modified = False
         for i in range(len(self.mechanisms)):
             if random() < self.epi_probs[i]:
+                modified = True
                 if self.mechanisms[i] == "imprinting":
-                    #TODO: Hacer gen imprimting
+                    # TODO: Hacer gen imprimting
                     pass
                 elif self.mechanisms[i] == "reprogramming":
-                    #TODO: Hacer reprogramming
+                    # TODO: Hacer reprogramming
                     pass
                 elif self.mechanisms[i] == "paramutation":
-                    #TODO: Hacer paramutation
+                    # TODO: Hacer paramutation
                     pass
                 elif self.mechanisms[i] == "position":
-                    self.position_mechanism(cell, 0.4) # TODO: parametize the prob?
+                    # TODO: parametize the prob?
+                    self.position_mechanism(cell, 0.4)
                 elif self.mechanisms[i] == "inactivation":
-                    #TODO: Hacer x-inactivation
+                    # TODO: Hacer x-inactivation
                     pass
                 elif self.mechanisms[i] == "bookmarking":
-                    #TODO: Hacer bookmarking
+                    # TODO: Hacer bookmarking
                     pass
                 elif self.mechanisms[i] == "silencing":
-                    #TODO: Hacer gene silencing
+                    # TODO: Hacer gene silencing
                     pass
+        if modified:
+            self.evaluate_cell(cell)
         return cell
 
     def position_mechanism(self, cell, probability):
@@ -362,21 +382,21 @@ class EpigeneticAlgorithm(object):
         Output:
             The new modified cell
         """
-        
-        #Get the indexes for genes that will be affected
+
+        # Get the indexes for genes that will be affected
         affected_indexes = []
-        for i in range(cell.nucleosome):
-            if cell.nucleosome[i] == 1 & random() <= probability:
+        for i in range(len(cell.nucleosome)):
+            if cell.nucleosome[i] == True and random() <= probability:
                 affected_indexes.append(i)
 
         relocation = []
         for elem in affected_indexes:
             relocation.append(elem)
-        
+
         shuffle(relocation)
         newsolution = [a for a in cell.solution]
 
-        #Change positions
+        # Change positions
         for i in range(len(relocation)):
             newsolution[affected_indexes[i]] = cell.solution[relocation[i]]
         cell.solution = newsolution
@@ -384,5 +404,8 @@ class EpigeneticAlgorithm(object):
         return cell
 
     def replacement(self, oldpop,  newpop):
-        #TODO
-        return newpop
+        # TODO
+        newpop = sorted(
+            newpop, key=lambda x: self.evaluate_individual(x), reverse=True
+        )
+        return newpop[:self.individuals_number]

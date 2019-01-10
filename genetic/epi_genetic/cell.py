@@ -2,13 +2,13 @@ import numpy as np
 
 class Cell:
 
-    def __init__(self, solution, father = None, mother = None, nucleosome = None, fitness = None):
+    def __init__(self, solution, father = None, mother = None, nucleosome = [], fitness = None):
         self.solution = solution
         self.father = father
         self.mother = mother
         self.fitness = fitness
-        if nucleosome == None:
-            self.nucleosome = np.zeros(len(solution))
+        if len(nucleosome)== 0:
+            self.nucleosome = np.zeros(len(solution), dtype=bool)
         else:
             self.nucleosome = nucleosome
 
