@@ -64,10 +64,10 @@ class EpigeneticAlgorithm(object):
             newpop = self.epigen_mechanism(newpop)
 
             population = self.replacement(population, newpop)
-            print(len(population))
+            #print(len(population))
             termination_condition = self.termination(i)
             i += 1
-            print('.')
+            #print('.')
 
     def calculate_distances(self, coordinates):
         distance_matrix = np.zeros((len(coordinates), len(coordinates)))
@@ -441,6 +441,8 @@ class EpigeneticAlgorithm(object):
         #Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         self.ax2.set_autoscaley_on(True)
+        self.ax2.set_yscale("log")
+        self.ax2.get_yaxis().get_major_formatter().labelOnlyBase = False
         # Other stuff
         self.ax.legend()
         self.ax.grid()
@@ -522,7 +524,7 @@ class EpigeneticAlgorithm(object):
             if pivot_fitness <= fitness:
                 fitness = pivot_fitness
                 cell_fitness = list(map(lambda cell: cell.fitness, individual))
-                print(f"Estas son las fitness de las celulas:{cell_fitness}")
+                #print(f"Estas son las fitness de las celulas:{cell_fitness}")
                 min_cell = individual[np.argmin(cell_fitness)]
 
         # TODO: Hacer la funcion print del mejor individual
