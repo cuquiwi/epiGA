@@ -33,6 +33,9 @@ class EpigeneticAlgorithm(object):
         self.position_prob = position_prob
         self.xdata_fitness = []
         self.ydata_fitness = []
+        self.mean_fitness = []
+        self.min_fitness = []
+        self.ydata_iter = []
 
     def call(self, coordinates, optimum_path):
         """Performs the actual algorithm taking into account the configuration 
@@ -431,14 +434,18 @@ class EpigeneticAlgorithm(object):
     def on_launch(self):
         # Set up plot
         self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
-        self.lines, = self.ax.plot([], [], 'go-')
-        self.lines_optimum, = self.ax.plot([], [], 'ro-.', alpha=0.5)
-        self.lines2, = self.ax2.plot([], [], 'b.', alpha=0.2)
-        # Autoscale on unknown axis and known lims on the other
+        self.lines, = self.ax.plot([],[], 'go-', label="Path found")
+        self.lines_optimum, = self.ax.plot([],[], 'ro-.', alpha=0.5, label="Optimal path")
+        self.lines2, = self.ax2.plot([],[], 'b.', alpha=0.2, label="Individual fitness")
+        self.mean_line, = self.ax2.plot([],[], 'y-', label="Mean fitness")
+        self.min_line, = self.ax2.plot([],[], 'g-', label="Best fitness")
+        #Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         self.ax2.set_autoscaley_on(True)
         # Other stuff
+        self.ax.legend()
         self.ax.grid()
+        self.ax2.legend()
         self.ax2.grid()
 
     def on_running(self, coordinates, currentPath, optimum_path, title_string):
@@ -472,14 +479,32 @@ class EpigeneticAlgorithm(object):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def on_running_fitness(self, population, iteration, title_string):
+    def on_running_fitness(self, population, iteration, min_fit, title_string):
         # Update data (with the new _and_ the old points)
+        total_fitness = 0
+        j=0
+
+        #All fitness points:
         for i in range(len(population)):
+            total_fitness += self.evaluate_individual(population[i])/self.cells_number
+            j += 1
             self.xdata_fitness.append(iteration)
             self.ydata_fitness.append(self.evaluate_individual(
                 population[i])/self.cells_number)
         self.lines2.set_xdata(self.xdata_fitness)
         self.lines2.set_ydata(self.ydata_fitness)
+
+        #Best fitness point:
+        self.min_fitness.append(min_fit/self.cells_number)
+        self.ydata_iter.append(iteration)
+        self.min_line.set_ydata(self.min_fitness)
+        self.min_line.set_xdata(self.ydata_iter)
+
+        #Mean fitness point:
+        self.mean_fitness.append(total_fitness/j)
+        self.mean_line.set_ydata(self.mean_fitness)
+        self.mean_line.set_xdata(self.ydata_iter)
+
         # Need both of these in order to rescale
         self.ax2.set_title(title_string)
         self.ax2.relim()
@@ -505,7 +530,7 @@ class EpigeneticAlgorithm(object):
         #print(f'Best Individual is: {min_ind}')
         self.on_running(coordinates, min_cell.solution, optimum_path,
                         "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
-        self.on_running_fitness(population, iteration,
+        self.on_running_fitness(population, iteration, fitness,
                                 "Distances of the population")
 
     def roulette_selection(self, population):
