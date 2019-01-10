@@ -322,15 +322,9 @@ class EpigeneticAlgorithm(object):
         Output:
             The new modified population.
         """
-        for i in range(len(population)):
-            individual = population[i]
-            for j in range(len(individual)):
-                cell = individual[j]
-                cell = self.apply_mechanisms(cell)
-                # TODO: Creo que esta línea está demas porque todos los objetos en python se pasan por referencia.
-                individual[j] = cell
-                #####################
-            population[i] = individual
+        for individual in population:
+            for cell in individual:
+                self.apply_mechanisms(cell)
         return population
 
     def apply_mechanisms(self, cell):
