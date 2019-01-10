@@ -218,14 +218,8 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         Output:
             Final population of the current epoch.
         """
-<<<<<<< HEAD
-        #TODO: Implementar un poco de elitismo
-        best_old = max(olders, key=lambda x:x.fitness)
-        newers[randint(1,len(newers)-1)] = best_old
-=======
         shuffle(newers)
         number_of_elite_ind = int(len(olders) * self.elitism_rate)
         best_old = sorted(olders, key=lambda x:x.fitness, reverse=True)[:number_of_elite_ind]
         newers[:number_of_elite_ind] = best_old
->>>>>>> 5bdc66eeb607ad5c01d9d997cce5c596897683a3
         return newers

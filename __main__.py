@@ -25,16 +25,10 @@ print('Objective distance is:', objective_distance)
 
 
 TSPGeneticAlgorithm(
-<<<<<<< HEAD
-    population_size=100,
-    mutation_rate=0.1,
-    max_epochs=2000
-=======
     population_size=500,
     mutation_rate=0.5,
     elitism_rate=0.2,
     max_epochs=1000
->>>>>>> 5bdc66eeb607ad5c01d9d997cce5c596897683a3
 ).call(distances, coordinates, optimal_path)
 
 print('Objective distance is:', objective_distance)
