@@ -61,6 +61,7 @@ class EpigeneticAlgorithm(object):
             newpop = self.epigen_mechanism(newpop)
 
             population = self.replacement(population, newpop)
+            print(len(population))
             termination_condition = self.termination(i)
             i += 1
             print('.')
@@ -116,7 +117,7 @@ class EpigeneticAlgorithm(object):
         """
         cell_fitness = list(map(lambda cell: cell.fitness, individual))
 
-        return np.max(cell_fitness)
+        return np.min(cell_fitness)
 
     def init_population(self):
         """
@@ -190,7 +191,7 @@ class EpigeneticAlgorithm(object):
             individual = population[i]
             for j in range(len(individual)):
                 cells = individual[j]
-                n = cells.nucleosome[:]
+                n = np.zeros(len(cells.nucleosome[:]), dtype=bool)
                 for k in range(len(n)):
                     if random() < self.nucleo_prob:
                         n = self.collapse(n, k)
@@ -214,9 +215,17 @@ class EpigeneticAlgorithm(object):
         return nucleosome
 
     def selectBestCell(self, individual):
-        # TODO:  Add description
+        """Selects the best cell inside the individual
+        
+        Arguments:
+            individual {List of Cells} -- Individual to look in
+        
+        Returns:
+            Cell -- The best cell of the individual
+        """
+
         fitness = list(map(lambda cell: cell.fitness, individual))
-        return individual[np.argmax(fitness)]
+        return individual[np.argmin(fitness)]
 
     def crossover(self, baseSolution, secondSolution, mask):
         """
@@ -269,7 +278,7 @@ class EpigeneticAlgorithm(object):
         for cell in individual:
             newInd.append(cell)
         fitness = list(map(lambda cell: cell.fitness, individual))
-        newInd.remove(individual[np.argmin(fitness)])
+        newInd.remove(individual[np.argmax(fitness)])
         newInd.append(newCell)
         return newInd
 
@@ -282,7 +291,7 @@ class EpigeneticAlgorithm(object):
             The list of children of the provious population
         """
         newPop = []
-        for _ in range(self.individuals_number):
+        for _ in range(2 * self.individuals_number):
             i1 = self.roulette_selection(population)
             i2 = self.roulette_selection(population)
             if (not (i1 == i2)):
@@ -484,7 +493,6 @@ class EpigeneticAlgorithm(object):
         #print(f'Best Individual is: {min_ind}')
         self.on_running(coordinates, min_cell.solution, "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
         self.on_running_fitness(population, iteration, "Distances of the population")
-
 
     def roulette_selection(self, population):
         individual_fitness = [self.evaluate_individual(individual) for individual in population]
