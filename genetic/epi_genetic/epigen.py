@@ -1,6 +1,7 @@
 from random import shuffle, random
 from .cell import Cell
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class EpigeneticAlgorithm(object):
@@ -19,6 +20,7 @@ class EpigeneticAlgorithm(object):
                         in the same order as the epiProb list.
             environment: Environment rules
             max_epochs: Maximun number of epochs
+            position_prob: Probability for the position epigenetic mechanism
         """
         self.individuals_number = individuals_number
         self.cells_number = cells_number
@@ -27,6 +29,7 @@ class EpigeneticAlgorithm(object):
         self.nucleo_rad = nucleo_rad
         self.mechanisms = mechanisms
         self.max_epochs = max_epochs
+        self.position_prob = position_prob
 
     def call(self, coordinates):
         """Performs the actual algorithm taking into account the configuration 
@@ -39,10 +42,16 @@ class EpigeneticAlgorithm(object):
 
         self.distances_matrix = self.calculate_distances(coordinates)
 
+        plt.ion()
+        self.on_launch()
+
         population = self.init_population()
         i = 0
         termination_condition = False
         while not termination_condition:
+
+            self.print_metric(population, coordinates)
+
             newpop = self.selection(population)
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
@@ -356,8 +365,7 @@ class EpigeneticAlgorithm(object):
                     # TODO: Hacer paramutation
                     pass
                 elif self.mechanisms[i] == "position":
-                    # TODO: parametize the prob?
-                    self.position_mechanism(cell, 0.4)
+                    self.position_mechanism(cell, self.position_prob)
                 elif self.mechanisms[i] == "inactivation":
                     # TODO: Hacer x-inactivation
                     pass
@@ -409,3 +417,44 @@ class EpigeneticAlgorithm(object):
             newpop, key=lambda x: self.evaluate_individual(x), reverse=True
         )
         return newpop[:self.individuals_number]
+
+    def on_launch(self):
+        # Set up plot
+        self.figure, self.ax = plt.subplots()
+        self.lines, = self.ax.plot([], [], 'go-')
+        # Autoscale on unknown axis and known lims on the other
+        self.ax.set_autoscaley_on(True)
+        # Other stuff
+        self.ax.grid()
+
+    def on_running(self, coordinates, currentPath):
+        # Update data (with the new _and_ the old points)
+        xdata = []
+        ydata = []
+        for i in range(len(currentPath)):
+            xdata.append(coordinates[currentPath[i]][0])
+            ydata.append(coordinates[currentPath[i]][1])
+        xdata.append(coordinates[currentPath[0]][0])
+        ydata.append(coordinates[currentPath[0]][1])
+        self.lines.set_xdata(xdata)
+        self.lines.set_ydata(ydata)
+        # Need both of these in order to rescale
+        self.ax.relim()
+        self.ax.autoscale_view()
+        # We need to draw *and* flush
+        self.figure.canvas.draw()
+        self.figure.canvas.flush_events()
+
+    def print_metric(self, population, coordinates):
+        fitness = 0
+        min_ind = None
+        #min_ind = max(population, key=lambda x:x.fitness)
+        for individual in population:
+            for cell in individual:
+                if cell.fitness >= fitness:
+                    fitness = cell.fitness
+                    min_ind = cell
+        # TODO: Hacer la funcion print del mejor individual
+        #print(f'Best Individual is: {min_ind}')
+
+        self.on_running(coordinates, min_ind.path)

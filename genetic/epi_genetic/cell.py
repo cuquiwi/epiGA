@@ -14,3 +14,5 @@ class Cell:
 
     def setfitness(self, fitness):
         self.fitness = fitness
+
+    #TODO: Hacer una funcion __str__
