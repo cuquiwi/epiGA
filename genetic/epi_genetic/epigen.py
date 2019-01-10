@@ -1,4 +1,4 @@
-from random import shuffle, random
+from random import shuffle, random, uniform
 from .cell import Cell
 import numpy as np
 import matplotlib.pyplot as plt
@@ -281,31 +281,32 @@ class EpigeneticAlgorithm(object):
             The list of children of the provious population
         """
         newPop = []
-        for i1 in population:
-            for i2 in population:
-                if (not (i1 == i2)):
-                    bestCell1 = self.selectBestCell(i1)
-                    bestCell2 = self.selectBestCell(i2)
-                    newNucleosome = np.logical_or(
-                        bestCell1.nucleosome, bestCell2.nucleosome)
-                    fatherBasedSolution = self.crossover(
-                        bestCell1.solution, bestCell2.solution, newNucleosome
-                    )
-                    motherBasedSolution = self.crossover(
-                        bestCell2.solution, bestCell1.solution, newNucleosome
-                    )
-                    newCellI1 = Cell(
-                        fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome
-                    )
-                    newCellI2 = Cell(
-                        motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome
-                    )
-                    self.evaluate_cell(newCellI1)
-                    self.evaluate_cell(newCellI2)
-                    i1_child = self.removeWorstCell(i1, newCellI1)
-                    i2_child = self.removeWorstCell(i2, newCellI2)
-                    newPop.append(i1_child)
-                    newPop.append(i2_child)
+        for _ in range(self.individuals_number):
+            i1 = self.roulette_selection(population)
+            i2 = self.roulette_selection(population)
+            if (not (i1 == i2)):
+                bestCell1 = self.selectBestCell(i1)
+                bestCell2 = self.selectBestCell(i2)
+                newNucleosome = np.logical_or(
+                    bestCell1.nucleosome, bestCell2.nucleosome)
+                fatherBasedSolution = self.crossover(
+                    bestCell1.solution, bestCell2.solution, newNucleosome
+                )
+                motherBasedSolution = self.crossover(
+                    bestCell2.solution, bestCell1.solution, newNucleosome
+                )
+                newCellI1 = Cell(
+                    fatherBasedSolution, bestCell1.solution, bestCell2.solution, newNucleosome
+                )
+                newCellI2 = Cell(
+                    motherBasedSolution, bestCell2.solution, bestCell1.solution, newNucleosome
+                )
+                self.evaluate_cell(newCellI1)
+                self.evaluate_cell(newCellI2)
+                i1_child = self.removeWorstCell(i1, newCellI1)
+                i2_child = self.removeWorstCell(i2, newCellI2)
+                newPop.append(i1_child)
+                newPop.append(i2_child)
         return newPop
 
     def epigen_mechanism(self, population):
@@ -459,3 +460,13 @@ class EpigeneticAlgorithm(object):
         #print(f'Best Individual is: {min_ind}')
 
         self.on_running(coordinates, min_ind.path)
+
+
+    def roulette_selection(self, population):
+        max = sum(self.evaluate_individual(individual) for individual in population)
+        pick = uniform(0, max)
+        current = 0
+        for individual in population:
+            current += self.evaluate_individual(individual)
+            if current > pick:
+                return individual
