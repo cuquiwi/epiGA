@@ -21,11 +21,11 @@ print('Objective distance is:', distance)
 EpigeneticAlgorithm(
     individuals_number = 100,
     cells_number = 10,
-    epi_probs = [0.8],
+    epi_probs = [0.8, 0.4],
     nucleo_prob = 0.4,
     position_prob=0.7,
     nucleo_rad = 1,
-    mechanisms = ['position'],
+    mechanisms = ['position', 'imprinting'],
     max_epochs=500
 ).call(coordinates, optimal_path)
 

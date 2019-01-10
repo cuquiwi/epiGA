@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 class EpigeneticAlgorithm(object):
 
     def __init__(self, individuals_number, cells_number, epi_probs,
-                 nucleo_prob, nucleo_rad, mechanisms, position_prob=0.4,
+                 nucleo_prob, nucleo_rad, mechanisms,
+                 position_prob=0.4, imprinting_prob=0.2,
                  max_epochs=500):
         """
         EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
@@ -31,6 +32,7 @@ class EpigeneticAlgorithm(object):
         self.mechanisms = mechanisms
         self.max_epochs = max_epochs
         self.position_prob = position_prob
+        self.imprinting_prob = imprinting_prob
         self.xdata_fitness = []
         self.ydata_fitness = []
         self.mean_fitness = []
@@ -365,8 +367,7 @@ class EpigeneticAlgorithm(object):
             if random() < self.epi_probs[i]:
                 modified = True
                 if self.mechanisms[i] == "imprinting":
-                    # TODO: Hacer gen imprimting
-                    pass
+                    self.imprinting_mechanism(cell, self.imprinting_prob)
                 elif self.mechanisms[i] == "reprogramming":
                     # TODO: Hacer reprogramming
                     pass
@@ -386,6 +387,45 @@ class EpigeneticAlgorithm(object):
                     pass
         if modified:
             self.evaluate_cell(cell)
+        return cell
+
+    def imprinting_mechanism(self, cell, probability):
+        """
+        Change the provenience of a gene with a certain probability, 
+        then swap-it for the value where it already existed.
+        
+        Inputs:
+            - Cell: to apply mechanisn
+            - probability: probability of applying the mechanism
+        Output:
+            The new modified cell
+        """
+        # If there is no father or mother can't do the mechanism
+        if cell.mother == None or cell.father == None:
+            return cell
+        
+        for i in range(len(cell.nucleosome)):
+
+            # If there is no change pass
+            if cell.nucleosome[i] == False or random() > probability:
+                continue
+            
+            # From wich parent the gene is from?
+            parent_equal = cell.father[i]
+            parent_change = cell.mother[i]
+            if cell.solution[i] != parent_equal:
+                parent_equal = parent_change
+                parent_change = cell.father[i]
+            
+            # Wich is the value to swap to avoid replication
+            value_replace = cell.solution[i]
+            index_replace = cell.solution.index(parent_change)
+
+            # Change the value from the other parent
+            cell.solution[i] = parent_change
+            # Swap-it of place where it was from
+            cell.solution[index_replace] = value_replace
+            
         return cell
 
     def position_mechanism(self, cell, probability):
