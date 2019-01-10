@@ -27,6 +27,6 @@ EpigeneticAlgorithm(
     nucleo_rad = 1,
     mechanisms = ['position'],
     max_epochs=500
-).call(coordinates)
+).call(coordinates, optimal_path)
 
 print('Objective distance is:', distance)
