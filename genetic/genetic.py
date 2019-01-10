@@ -22,7 +22,8 @@ class ITSPGeneticAlgorithm(object):
         self.max_epochs = max_epochs
         self.elitism_rate = elitism_rate
 
-    def call(self, distance_matrix, coordinates, optimal_path):
+    def call(self, coordinates, optimal_path):
+        distance_matrix = self.calculate_distances(coordinates)
         population = self.do_initialize_population(len(distance_matrix))
         
         plt.ion()
@@ -43,6 +44,15 @@ class ITSPGeneticAlgorithm(object):
             population = self.do_next_generation(population, new_population)
 
         return population
+    
+    def calculate_distances(self, coordinates):
+        distance_matrix = np.zeros((len(coordinates), len(coordinates)))
+        for i in range(len(coordinates)):
+            for j in range(len(coordinates)):
+                distance_matrix[i][j] = np.linalg.norm(
+                    coordinates[i] - coordinates[j]
+                )
+        return distance_matrix
 
     def print_metric(self, population, coordinates, optimal_path):
         fitness = 0

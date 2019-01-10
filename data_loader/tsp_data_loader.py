@@ -22,14 +22,7 @@ def load_problem_file(file_name):
                 ])
             )
 
-    distance_matrix = np.zeros((len(coordinates), len(coordinates)))
-    for i in range(len(coordinates)):
-        for j in range(len(coordinates)):
-            distance_matrix[i][j] = np.linalg.norm(
-                coordinates[i] - coordinates[j]
-            )
-
-    return distance_matrix, coordinates
+    return coordinates
 
 
 def load_solution_file(file_name):

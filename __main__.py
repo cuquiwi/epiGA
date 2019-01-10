@@ -12,14 +12,16 @@ distances = [
 optimal_path = [0, 2, 3, 1]
 
 
-distances, coordinates = load_problem_file('res/berlin52.tsp')
+coordinates = load_problem_file('res/berlin52.tsp')
 optimal_path = load_solution_file('res/berlin52.opt.tour')
 
 objective_distance = 0.0
 for i in range(len(optimal_path) - 1):
     c_from = optimal_path[i]
     c_to = optimal_path[i + 1]
-    objective_distance += distances[c_to][c_from]
+    objective_distance += np.linalg.norm(
+        coordinates[c_to] - coordinates[c_from]
+    )
 
 print('Objective distance is:', objective_distance)
 
@@ -29,6 +31,6 @@ TSPGeneticAlgorithm(
     mutation_rate=0.5,
     elitism_rate=0.2,
     max_epochs=1000
-).call(distances, coordinates, optimal_path)
+).call(coordinates, optimal_path)
 
 print('Objective distance is:', objective_distance)
