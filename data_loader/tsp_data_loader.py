@@ -13,7 +13,7 @@ def load_problem_file(file_name):
     """
     coordinates = []
     with open(file_name, 'r') as file:
-        for line in file.readlines()[6:-1]:
+        for line in file.readlines()[6:-2]:
             raw_coordinates = re.findall(r'\d+', line)[1:]
             coordinates.append(
                 np.array([

@@ -12,8 +12,8 @@ distances = [
 optimal_path = [0, 2, 3, 1]
 
 
-distances, coordinates = load_problem_file('res/a280.tsp')
-optimal_path = load_solution_file('res/a280.opt.tour')
+distances, coordinates = load_problem_file('res/berlin52.tsp')
+optimal_path = load_solution_file('res/berlin52.opt.tour')
 
 objective_distance = 0.0
 for i in range(len(optimal_path) - 1):
@@ -25,9 +25,16 @@ print('Objective distance is:', objective_distance)
 
 
 TSPGeneticAlgorithm(
+<<<<<<< HEAD
     population_size=100,
     mutation_rate=0.1,
     max_epochs=2000
+=======
+    population_size=500,
+    mutation_rate=0.5,
+    elitism_rate=0.2,
+    max_epochs=1000
+>>>>>>> 5bdc66eeb607ad5c01d9d997cce5c596897683a3
 ).call(distances, coordinates, optimal_path)
 
 print('Objective distance is:', objective_distance)
