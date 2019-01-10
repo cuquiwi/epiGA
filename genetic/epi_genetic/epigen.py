@@ -530,7 +530,7 @@ class EpigeneticAlgorithm(object):
         # TODO: Hacer la funcion print del mejor individual
         #print(f'Best Individual is: {min_ind}')
         self.on_running(coordinates, min_cell.solution, optimum_path,
-                        "Iteration: "+str(iteration) + " Best Path: " + str(fitness))
+                        "Iteration: "+str(iteration) + " Best Path: " + str(int(fitness)))
         self.on_running_fitness(population, iteration, fitness,
                                 "Distances of the population")
 
