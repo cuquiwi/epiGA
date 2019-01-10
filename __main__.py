@@ -24,4 +24,4 @@ TSPGeneticAlgorithm(
     max_epochs=1000
 ).call(coordinates, optimal_path)
 
-print('Objective distance is:', objective_distance)
+print('Objective distance is:', distance)
