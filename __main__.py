@@ -13,18 +13,9 @@ optimal_path = [0, 2, 3, 1]
 
 
 coordinates = load_problem_file('res/berlin52.tsp')
-optimal_path = load_solution_file('res/berlin52.opt.tour')
+optimal_path, distance = load_solution_file('res/berlin52.opt.tour', coordinates)
 
-objective_distance = 0.0
-for i in range(len(optimal_path) - 1):
-    c_from = optimal_path[i]
-    c_to = optimal_path[i + 1]
-    objective_distance += np.linalg.norm(
-        coordinates[c_to] - coordinates[c_from]
-    )
-
-print('Objective distance is:', objective_distance)
-
+print('Objective distance is:', distance)
 
 TSPGeneticAlgorithm(
     population_size=500,

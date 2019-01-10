@@ -25,12 +25,13 @@ def load_problem_file(file_name):
     return coordinates
 
 
-def load_solution_file(file_name):
+def load_solution_file(file_name, coordinates):
     """Loads a solution file containing a TSP problem defined by iwr in their
     own format
 
     Arguments:
         file_name {str} -- Path to the file
+        coordinates {List} -- Coordinates
     Returns:
         vector -- Ordered cities
     """
@@ -41,4 +42,12 @@ def load_solution_file(file_name):
             city_index = int(re.findall(r'\d+', line)[0]) - 1
             path.append(city_index)
 
-    return path
+    objective_distance = 0.0
+    for i in range(len(path) - 1):
+        c_from = path[i]
+        c_to = path[i + 1]
+        objective_distance += np.linalg.norm(
+            coordinates[c_to] - coordinates[c_from]
+        )
+
+    return path, objective_distance
