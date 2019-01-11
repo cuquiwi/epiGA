@@ -352,7 +352,7 @@ class EpigeneticAlgorithm(object):
                     self.imprinting_mechanism(cell, self.imprinting_prob)
                 elif self.mechanisms[i] == "reprogramming":
                     # TODO: Try the other reprograming
-                    self.reprograming2(cell, self.epi_probs[i])
+                    self.reprograming1(cell, self.epi_probs[i])
                 elif self.mechanisms[i] == "paramutation":
                     # TODO: Hacer paramutation
                     pass
@@ -478,7 +478,7 @@ class EpigeneticAlgorithm(object):
         """
         if cell.mother == None or cell.father == None:
             return cell
-            
+
         mask = cell.nucleosome[:]
         changes = []
         for i in range(len(mask)):
@@ -487,12 +487,12 @@ class EpigeneticAlgorithm(object):
                 changes.append(i)
 
         bestCell = cell
-        
+
         for pos in changes:
             newMask = mask[:]
             newMask[pos] = 0
-            newSolution = self.crossover(cell.father,cell.mother,newMask)
-            newCell = Cell(newSolution,cell.father, cell.mother)
+            newSolution = self.crossover(cell.father, cell.mother, newMask)
+            newCell = Cell(newSolution, cell.father, cell.mother)
             fitness = self.evaluate_cell(newCell)
             if fitness < bestCell.fitness:
                 bestCell = newCell
@@ -566,10 +566,16 @@ class EpigeneticAlgorithm(object):
         ]
 
     def on_epoch(self, population, i):
+        pop = [
+            list(map(lambda cell: cell, individual))
+            for individual in population
+        ]
+        pop = [item for sublist in pop for item in sublist]
+        sorted_pop = sorted(pop, key=lambda c: c.fitness)
         [
             sub.on_epoch(
-                population,
-                [self.evaluate_individual(i) for i in population],
+                [i.solution for i in sorted_pop],
+                [i.fitness for i in sorted_pop],
                 i
             )
             for sub in self.subscriptions

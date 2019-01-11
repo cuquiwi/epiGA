@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 class GeneticMetricPrinter(object):
 
     def __init__(self):
@@ -10,11 +11,11 @@ class GeneticMetricPrinter(object):
         self.min_fitness = []
         self.ydata_iter = []
         self.coordinates = []
-        self.optimun_path = []
+        self.optimum_path = []
 
-    def on_launch(self, coordinates, optimun_path):
+    def on_launch(self, coordinates, optimum_path):
         self.coordinates = coordinates
-        self.optimun_path = optimun_path
+        self.optimum_path = optimum_path
 
         plt.ion()
         # Set up plot
@@ -37,6 +38,22 @@ class GeneticMetricPrinter(object):
         self.ax2.legend()
         self.ax2.grid()
 
+    def on_epoch(self, solutions, fitnesses, iteration):
+        """Receives solutions sorted by their fitness
+        
+        Arguments:
+            solutions {[type]} -- [description]
+            fitnesses {[type]} -- [description]
+            iteration {[type]} -- [description]
+        """
+        best_solution = solutions[0]
+        best_fitness = fitnesses[0]
+
+        self.on_running(best_solution,
+                        "Iteration: "+str(iteration) + " Best Path: " + str(int(best_fitness)))
+        self.on_running_fitness(solutions, fitnesses, iteration, best_fitness,
+                                "Distances of the population")
+
     def on_running(self, currentPath, title_string):
         # Update data (with the new _and_ the old points)
         xdata = []
@@ -52,11 +69,11 @@ class GeneticMetricPrinter(object):
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
 
-        for i in range(len(self.optimun_path)):
-            xdata_opt.append(self.coordinates[self.optimun_path[i]][0])
-            ydata_opt.append(self.coordinates[self.optimun_path[i]][1])
-        xdata_opt.append(self.coordinates[self.optimun_path[0]][0])
-        ydata_opt.append(self.coordinates[self.optimun_path[0]][1])
+        for i in range(len(self.optimum_path)):
+            xdata_opt.append(self.coordinates[self.optimum_path[i]][0])
+            ydata_opt.append(self.coordinates[self.optimum_path[i]][1])
+        xdata_opt.append(self.coordinates[self.optimum_path[0]][0])
+        ydata_opt.append(self.coordinates[self.optimum_path[0]][1])
         self.lines_optimum.set_xdata(xdata_opt)
         self.lines_optimum.set_ydata(ydata_opt)
         # Need both of these in order to rescale
@@ -68,28 +85,28 @@ class GeneticMetricPrinter(object):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def on_running_fitness(self, population, fitnesses, iteration, min_fit, title_string):
+    def on_running_fitness(self, solutions, fitnesses, iteration, min_fit, title_string):
         # Update data (with the new _and_ the old points)
         total_fitness = 0
         j = 0
 
         # All fitness points:
-        for i in range(len(population)):
-            total_fitness += fitnesses[i]/len(population[0])
-            j += 1
-            self.xdata_fitness.append(iteration)
-            self.ydata_fitness.append(fitnesses[i]/len(population[0]))
+
+        self.xdata_fitness.extend([iteration for _ in range(len(solutions))])
+        self.ydata_fitness.extend(fitnesses)
+        total_fitness = sum(fitnesses)
+
         self.lines2.set_xdata(self.xdata_fitness)
         self.lines2.set_ydata(self.ydata_fitness)
 
         # Best fitness point:
-        self.min_fitness.append(min_fit/len(population[0]))
+        self.min_fitness.append(min_fit)
         self.ydata_iter.append(iteration)
         self.min_line.set_ydata(self.min_fitness)
         self.min_line.set_xdata(self.ydata_iter)
 
         # Mean fitness point:
-        self.mean_fitness.append(total_fitness/j)
+        self.mean_fitness.append(total_fitness/len(solutions))
         self.mean_line.set_ydata(self.mean_fitness)
         self.mean_line.set_xdata(self.ydata_iter)
 
@@ -100,17 +117,3 @@ class GeneticMetricPrinter(object):
 
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
-
-    def on_epoch(self, population, fitnesses, iteration):
-        fitness = np.Infinity
-        min_cell = None
-        for individual, pivot_fitness in zip(population, fitnesses):
-            if pivot_fitness <= fitness:
-                fitness = pivot_fitness
-                cell_fitness = list(map(lambda cell: cell.fitness, individual))
-                min_cell = individual[np.argmin(cell_fitness)]
-
-        self.on_running(min_cell.solution,
-                        "Iteration: "+str(iteration) + " Best Path: " + str(int(fitness)))
-        self.on_running_fitness(population,fitnesses, iteration, fitness,
-                                "Distances of the population")
