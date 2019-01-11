@@ -27,7 +27,7 @@ alg = EpigeneticAlgorithm(
 
     nucleo_rad=3,
     mechanisms=['position', 'imprinting', 'reprogramming'],
-    epi_probs=[1, 1, 0.3],
+    epi_probs=[1, 1, 0.01],
     position_prob=.5,
 
     max_epochs=500
