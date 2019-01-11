@@ -66,6 +66,9 @@ class EpigeneticAlgorithm(object):
                 np.average([self.evaluate_individual(i) for i in newpop])
             )
             i += 1
+        resultingFitness = [cell.fitness for individual in population for cell in individual]
+        sorted(resultingFitness)
+        return resultingFitness[0]
 
     def calculate_distances(self, coordinates):
         """Calculates the initial matrix of distances
@@ -98,8 +101,11 @@ class EpigeneticAlgorithm(object):
             otherwise.
         """
         if i >= self.max_epochs:
+            print(f"Terminated due to maximum number of epochs reached ={self.max_epochs}")
             return True
-        if i >= 15 and np.average(fitnesses[:15]) == fitnesses[-1]:
+        if i >= 15 and np.average(fitnesses[-15:]) == fitnesses[-1]:
+            print("Terminated due to apparent convergence.")
+            print("More than 15 epochs have passed with no chane in individual average fitness")
             return True
         return False
 
@@ -351,8 +357,8 @@ class EpigeneticAlgorithm(object):
                 if self.mechanisms[i] == "imprinting":
                     self.imprinting_mechanism(cell, self.imprinting_prob)
                 elif self.mechanisms[i] == "reprogramming":
-                    # TODO: Try the other reprograming
                     self.reprograming1(cell, self.epi_probs[i])
+                    # self.reprograming2(cell, self.epi_probs[i])
                 elif self.mechanisms[i] == "paramutation":
                     # TODO: Hacer paramutation
                     pass
@@ -530,7 +536,7 @@ class EpigeneticAlgorithm(object):
                 position = pos+1
             if pos-1 >=0:
                 newDist = self.distances_matrix[cell.solution[pos]][cell.solution[pos-1]]
-                if neighbor == None or newDist < distance:
+                if neighbor == None or newDist > distance:
                     neighbor = cell.solution[pos-1]
                     distance = newDist
                     position = pos-1
@@ -545,6 +551,7 @@ class EpigeneticAlgorithm(object):
                     cell.solution[i] = mapping[cell.solution[i]]
 
             cell.solution[position] = new
+            self.evaluate_cell(cell)
 
         return cell
 

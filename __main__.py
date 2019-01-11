@@ -4,13 +4,13 @@ from util.metrics_util import GeneticMetricPrinter
 import numpy as np
 from data_loader import load_solution_file, load_problem_file
 
-coordinates = load_problem_file('res/a280.tsp')
-optimal_path, distance = load_solution_file('res/a280.opt.tour', coordinates)
+coordinates = load_problem_file('res/berlin52.tsp')
+optimal_path, distance = load_solution_file('res/berlin52.opt.tour', coordinates)
 
 print('Objective distance is:', distance)
 
 alg = EpigeneticAlgorithm(
-    individuals_number=50,
+    individuals_number=100,
     cells_number=10,
 
     nucleo_prob=0.02,
@@ -18,7 +18,8 @@ alg = EpigeneticAlgorithm(
     nucleo_rad=3,
     mechanisms=['position', 'imprinting', 'reprogramming'],
     epi_probs=[1, 1, 0.1],
-    position_prob=.5,
+    position_prob=.2,
+    imprinting_prob=0.2,
 
     max_epochs=500
 )
@@ -31,6 +32,6 @@ alg = EpigeneticAlgorithm(
 
 alg.subscribe(GeneticMetricPrinter())
 
-alg.call(coordinates, optimal_path)
+result = alg.call(coordinates, optimal_path)
 
-print('Objective distance is:', distance)
+print('Obtained distance is:', result)
