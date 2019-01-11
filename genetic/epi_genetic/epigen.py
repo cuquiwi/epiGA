@@ -55,8 +55,8 @@ class EpigeneticAlgorithm(object):
 
         population = self.init_population()
         i = 0
-        termination_condition = False
-        while not termination_condition:
+        fitnesses = []
+        while not self.termination(i, fitnesses):
 
             self.print_metric(population, coordinates, optimum_path, i)
 
@@ -64,14 +64,24 @@ class EpigeneticAlgorithm(object):
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
             newpop = self.epigen_mechanism(newpop)
+            
 
             population = self.replacement(population, newpop)
-            #print(len(population))
-            termination_condition = self.termination(i)
-            i += 1
-            #print('.')
+
+            fitnesses.append(
+                np.average([self.evaluate_individual(i) for i in newpop])
+            )
 
     def calculate_distances(self, coordinates):
+        """Calculates the initial matrix of distances
+        
+        Arguments:
+            coordinates {Array of Coordinates} -- Coordinates of the city
+        
+        Returns:
+            Matrix NxN -- Matrix of distances
+        """
+
         distance_matrix = np.zeros((len(coordinates), len(coordinates)))
         for i in range(len(coordinates)):
             for j in range(len(coordinates)):
@@ -80,20 +90,23 @@ class EpigeneticAlgorithm(object):
                 )
         return distance_matrix
 
-    def termination(self, i):
+    def termination(self, i, fitnesses):
         """
-        Termination condition for the EpiGA.
+        Termination condition for the EpiGA. It will stop whenever it gets to a 
+        maximun epochs or the last fitnesses are equal.
+
         Inputs:
             - i: Current iteration of the algorithm.
+            - fitnesses: fitness in all the iterations
         Output:
             True if the termination condition is accomplished, False
             otherwise.
         """
-        # TODO: Hacer una super funcion de terminacion. Discuss why.
         if i >= self.max_epochs:
             return True
-        else:
-            return False
+        if i>= 15 and np.average(fitnesses[:15]) == fitnesses[-1]:
+            return True
+        return False
 
     def evaluate_cell(self, cell):
         """
@@ -392,7 +405,7 @@ class EpigeneticAlgorithm(object):
         """
         Change the provenience of a gene with a certain probability, 
         then swap-it for the value where it already existed.
-        
+
         Inputs:
             - Cell: to apply mechanisn
             - probability: probability of applying the mechanism
@@ -402,20 +415,20 @@ class EpigeneticAlgorithm(object):
         # If there is no father or mother can't do the mechanism
         if cell.mother == None or cell.father == None:
             return cell
-        
+
         for i in range(len(cell.nucleosome)):
 
             # If there is no change pass
             if cell.nucleosome[i] == False or random() > probability:
                 continue
-            
+
             # From wich parent the gene is from?
             parent_equal = cell.father[i]
             parent_change = cell.mother[i]
             if cell.solution[i] != parent_equal:
                 parent_equal = parent_change
                 parent_change = cell.father[i]
-            
+
             # Wich is the value to swap to avoid replication
             value_replace = cell.solution[i]
             index_replace = cell.solution.index(parent_change)
@@ -424,7 +437,7 @@ class EpigeneticAlgorithm(object):
             cell.solution[i] = parent_change
             # Swap-it of place where it was from
             cell.solution[index_replace] = value_replace
-            
+
         return cell
 
     def position_mechanism(self, cell, probability):
@@ -473,12 +486,14 @@ class EpigeneticAlgorithm(object):
     def on_launch(self):
         # Set up plot
         self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
-        self.lines, = self.ax.plot([],[], 'go-', label="Path found")
-        self.lines_optimum, = self.ax.plot([],[], 'ro-.', alpha=0.5, label="Optimal path")
-        self.lines2, = self.ax2.plot([],[], 'b.', alpha=0.2, label="Individual fitness")
-        self.mean_line, = self.ax2.plot([],[], 'y-', label="Mean fitness")
-        self.min_line, = self.ax2.plot([],[], 'g-', label="Best fitness")
-        #Autoscale on unknown axis and known lims on the other
+        self.lines, = self.ax.plot([], [], 'go-', label="Path found")
+        self.lines_optimum, = self.ax.plot(
+            [], [], 'ro-.', alpha=0.5, label="Optimal path")
+        self.lines2, = self.ax2.plot(
+            [], [], 'b.', alpha=0.2, label="Individual fitness")
+        self.mean_line, = self.ax2.plot([], [], 'y-', label="Mean fitness")
+        self.min_line, = self.ax2.plot([], [], 'g-', label="Best fitness")
+        # Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
         self.ax2.set_autoscaley_on(True)
         self.ax2.set_yscale("log")
@@ -523,11 +538,12 @@ class EpigeneticAlgorithm(object):
     def on_running_fitness(self, population, iteration, min_fit, title_string):
         # Update data (with the new _and_ the old points)
         total_fitness = 0
-        j=0
+        j = 0
 
-        #All fitness points:
+        # All fitness points:
         for i in range(len(population)):
-            total_fitness += self.evaluate_individual(population[i])/self.cells_number
+            total_fitness += self.evaluate_individual(
+                population[i])/self.cells_number
             j += 1
             self.xdata_fitness.append(iteration)
             self.ydata_fitness.append(self.evaluate_individual(
@@ -535,13 +551,13 @@ class EpigeneticAlgorithm(object):
         self.lines2.set_xdata(self.xdata_fitness)
         self.lines2.set_ydata(self.ydata_fitness)
 
-        #Best fitness point:
+        # Best fitness point:
         self.min_fitness.append(min_fit/self.cells_number)
         self.ydata_iter.append(iteration)
         self.min_line.set_ydata(self.min_fitness)
         self.min_line.set_xdata(self.ydata_iter)
 
-        #Mean fitness point:
+        # Mean fitness point:
         self.mean_fitness.append(total_fitness/j)
         self.mean_line.set_ydata(self.mean_fitness)
         self.mean_line.set_xdata(self.ydata_iter)
