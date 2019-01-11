@@ -1,4 +1,4 @@
-from random import shuffle, random, uniform
+from random import shuffle, random, uniform, sample
 from .cell import Cell
 import numpy as np
 import matplotlib.pyplot as plt
@@ -64,20 +64,20 @@ class EpigeneticAlgorithm(object):
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
             newpop = self.epigen_mechanism(newpop)
-            
 
             population = self.replacement(population, newpop)
 
             fitnesses.append(
                 np.average([self.evaluate_individual(i) for i in newpop])
             )
+            i += 1
 
     def calculate_distances(self, coordinates):
         """Calculates the initial matrix of distances
-        
+
         Arguments:
             coordinates {Array of Coordinates} -- Coordinates of the city
-        
+
         Returns:
             Matrix NxN -- Matrix of distances
         """
@@ -104,7 +104,7 @@ class EpigeneticAlgorithm(object):
         """
         if i >= self.max_epochs:
             return True
-        if i>= 15 and np.average(fitnesses[:15]) == fitnesses[-1]:
+        if i >= 15 and np.average(fitnesses[:15]) == fitnesses[-1]:
             return True
         return False
 
@@ -120,8 +120,9 @@ class EpigeneticAlgorithm(object):
         solution = cell.solution
         fitness = 0
         for i in range(1, len(solution)):
-            fitness += self.distances_matrix[cell.solution[i-1]
-                                             ][cell.solution[i]]
+            origin = cell.solution[i-1]
+            destination = cell.solution[i]
+            fitness += self.distances_matrix[origin][destination]
         cell.setfitness(fitness)
 
         return fitness
@@ -134,9 +135,7 @@ class EpigeneticAlgorithm(object):
         Return:
             - fitness of the individual
         """
-        cell_fitness = list(map(lambda cell: cell.fitness, individual))
-
-        return np.min(cell_fitness)
+        return min(individual, key=lambda cell: cell.fitness).fitness
 
     def init_population(self):
         """
@@ -147,10 +146,11 @@ class EpigeneticAlgorithm(object):
         population = []
         for _ in range(self.individuals_number):
             individual = []
-            for j in range(self.cells_number):
-                solution = [k for k in range(len(self.distances_matrix))]
-                shuffle(solution)
+            for _ in range(self.cells_number):
+                n_nodes = len(self.distances_matrix)
+                solution = sample(range(n_nodes), n_nodes)
                 cell = Cell(solution)
+
                 self.evaluate_cell(cell)
                 individual.append(cell)
 
@@ -179,24 +179,6 @@ class EpigeneticAlgorithm(object):
             i += 2
         return winners
 
-    def k_tournament_selection(self, pop, k=2):
-        """
-        Performs a tournament selection, by default a binary selection
-        Inputs:
-            - pop: The total population
-            - k: the number of individuals to compete, default is 2
-        Return:
-            The winner of the k-tournament
-        """
-        best = None
-        bestfit = 0
-        for i in range(1, k):
-            ind = pop[random(1, len(pop))]
-            if (best == None) or self.evaluate_individual(ind) > bestfit:
-                best = ind
-                bestfit = self.evaluate_individual(best)
-        return best
-
     def nucleosome_generation(self, population):
         """
         Generates a new nucleosome vector as a mask for each cell in the 
@@ -206,17 +188,13 @@ class EpigeneticAlgorithm(object):
         Output:
             The population with the new nucleosomes generated.
         """
-        for i in range(len(population)):
-            individual = population[i]
-            for j in range(len(individual)):
-                cells = individual[j]
-                n = np.zeros(len(cells.nucleosome[:]), dtype=bool)
-                for k in range(len(n)):
+        for individual in population:
+            for cells in individual:
+                nucleosome = np.zeros(len(cells.nucleosome), dtype=bool)
+                for k in range(len(nucleosome)):
                     if random() < self.nucleo_prob:
-                        n = self.collapse(n, k)
-                cells.nucleosome = n
-                individual[j] = cells
-            population[i] = individual
+                        self.collapse(nucleosome, k)
+                cells.nucleosome = nucleosome
         return population
 
     def collapse(self, nucleosome, k):
@@ -242,9 +220,7 @@ class EpigeneticAlgorithm(object):
         Returns:
             Cell -- The best cell of the individual
         """
-
-        fitness = list(map(lambda cell: cell.fitness, individual))
-        return individual[np.argmin(fitness)]
+        return min(individual, key=lambda cell: cell.fitness)
 
     def crossover(self, baseSolution, secondSolution, mask):
         """
@@ -295,8 +271,7 @@ class EpigeneticAlgorithm(object):
         newInd = []
         for cell in individual:
             newInd.append(cell)
-        fitness = list(map(lambda cell: cell.fitness, individual))
-        newInd.remove(individual[np.argmax(fitness)])
+        newInd.remove(max(individual, key=lambda cell: cell.fitness))
         newInd.append(newCell)
         return newInd
 
@@ -476,7 +451,6 @@ class EpigeneticAlgorithm(object):
     def replacement(self, oldpop,  newpop):
         """
         Get the best of the two populations. Pure elitism used.
-        TODO: Change method
         """
         newpop = sorted(
             [*oldpop, *newpop], key=lambda x: self.evaluate_individual(x)
