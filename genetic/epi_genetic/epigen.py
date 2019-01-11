@@ -472,9 +472,9 @@ class EpigeneticAlgorithm(object):
 
     def reprograming1(self, cell, prob):
         """
-        Choose random gene from mask with one and substitute its first neighbor 
-        (might be right left or the longest of both) by the shortest path, and 
-        make the corresponding change in the rest of the genome
+        Choose randomly a gene from mask with one and see if changing the mask 
+        of that gene to 0 and making the crossover again yields a better result. 
+        If so, maintain the change. Otherwise revert.
         """
         if cell.mother == None or cell.father == None:
             return cell
@@ -503,6 +503,61 @@ class EpigeneticAlgorithm(object):
             cell.nucleosome = bestCell.nucleosome
 
         return cell
+
+    def reprograming2(self, cell, prob):
+        """
+        Choose random gene from mask with one and substitute its first neighbor 
+        (might be right left or the longest of both) by the shortest path, and 
+        make the corresponding change in the rest of the genome.
+        """
+        if cell.mother == None or cell.father == None:
+            return cell
+            
+        mask = cell.nucleosome[:]
+        changes = []
+        for i in range(len(mask)):
+            pos = mask[i]
+            if pos and random() < prob:
+                changes.append(i)
+
+        for pos in changes:
+            neighbor = None
+            distance = 999999999
+            position = pos
+            if pos+1 < len(mask):
+                neighbor = cell.solution[pos+1]
+                distance = self.distances_matrix[cell.solution[pos]][neighbor]
+                position = pos+1
+            if pos-1 >=0:
+                newDist = self.distances_matrix[cell.solution[pos]][cell.solution[pos-1]]
+                if neighbor == None or newDist < distance:
+                    neighbor = cell.solution[pos-1]
+                    distance = newDist
+                    position = pos-1
+            
+            previous = cell.solution[position]
+            new = self.getShortest(cell.solution[pos])
+            #assert(new != previous)
+            mapping = {new:previous}
+
+            for i in range(len(cell.solution)):
+                if cell.solution[i] in mapping:
+                    cell.solution[i] = mapping[cell.solution[i]]
+
+            cell.solution[position] = new
+
+        return cell
+
+    def getShortest(self,city):
+        shortestDist = None
+        shortestCity = None
+        for i in range(len(self.distances_matrix[city])):
+            dist = self.distances_matrix[city][i]
+            if (shortestDist == None and i != city) or (i != city and dist < shortestDist):
+                shortestDist = self.distances_matrix[city][i]
+                shortestCity = i
+            
+        return shortestCity
 
     def on_launch(self, coordinates, optimum_path):
         [
