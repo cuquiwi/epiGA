@@ -8,12 +8,17 @@ class GeneticMetricPrinter(object):
         self.xdata_fitness = []
         self.ydata_fitness = []
         self.mean_fitness = []
+        self.mean_fitness_cells = []
         self.min_fitness = []
         self.ydata_iter = []
         self.coordinates = []
         self.optimum_path = []
 
-    def on_launch(self, coordinates, optimum_path):
+    def on_launch(self, coordinates, optimum_path, epigenetic=True):
+        """
+        Inputs:
+            - epigenetic: if we are going to plot an EpiGA.
+        """
         self.coordinates = coordinates
         self.optimum_path = optimum_path
 
@@ -25,7 +30,9 @@ class GeneticMetricPrinter(object):
             [], [], 'ro-.', alpha=0.5, label="Optimal path")
         self.lines2, = self.ax2.plot(
             [], [], 'b.', alpha=0.2, label="Individual fitness")
-        self.mean_line, = self.ax2.plot([], [], 'y-', label="Mean fitness")
+        self.mean_line, = self.ax2.plot([], [], 'm-', label="Mean fitness")
+        if epigenetic:
+            self.mean_line_best, = self.ax2.plot([], [], 'c-', label="Mean fitness individuals")
         self.min_line, = self.ax2.plot([], [], 'g-', label="Best fitness")
         # Autoscale on unknown axis and known lims on the other
         self.ax.set_autoscaley_on(True)
@@ -38,7 +45,7 @@ class GeneticMetricPrinter(object):
         self.ax2.legend()
         self.ax2.grid()
 
-    def on_epoch(self, solutions, fitnesses, iteration):
+    def on_epoch(self, solutions, fitnesses, iteration, epigenetic=True, minimum = None):
         """Receives solutions sorted by their fitness
         
         Arguments:
@@ -52,7 +59,7 @@ class GeneticMetricPrinter(object):
         self.on_running(best_solution,
                         "Iteration: "+str(iteration) + " Best Path: " + str(int(best_fitness)))
         self.on_running_fitness(solutions, fitnesses, iteration, best_fitness,
-                                "Distances of the population")
+                                "Distances of the population", epigenetic, minimum)
 
     def on_running(self, currentPath, title_string):
         # Update data (with the new _and_ the old points)
@@ -81,11 +88,10 @@ class GeneticMetricPrinter(object):
         self.ax.relim()
         self.ax.autoscale_view()
         # We need to draw *and* flush
-        # plt.title(title_string)
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def on_running_fitness(self, solutions, fitnesses, iteration, min_fit, title_string):
+    def on_running_fitness(self, solutions, fitnesses, iteration, min_fit, title_string, epigenetic, minimum):
         # Update data (with the new _and_ the old points)
         total_fitness = 0
         j = 0
@@ -109,6 +115,13 @@ class GeneticMetricPrinter(object):
         self.mean_fitness.append(total_fitness/len(solutions))
         self.mean_line.set_ydata(self.mean_fitness)
         self.mean_line.set_xdata(self.ydata_iter)
+
+        # Mean fitness point for best cells in an EpiGA:
+        if epigenetic:
+            self.mean_fitness_cells.append(np.mean(minimum))
+            self.mean_line_best.set_ydata(self.mean_fitness_cells)
+            self.mean_line_best.set_xdata(self.ydata_iter)
+
 
         # Need both of these in order to rescale
         self.ax2.set_title(title_string)

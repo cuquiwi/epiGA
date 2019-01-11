@@ -515,13 +515,18 @@ class EpigeneticAlgorithm(object):
             list(map(lambda cell: cell, individual))
             for individual in population
         ]
+        min_individuals = [
+            self.evaluate_individual(individual)
+            for individual in population
+        ]
         pop = [item for sublist in pop for item in sublist]
         sorted_pop = sorted(pop, key=lambda c: c.fitness)
         [
             sub.on_epoch(
                 [i.solution for i in sorted_pop],
                 [i.fitness for i in sorted_pop],
-                i
+                i,
+                minimum = min_individuals
             )
             for sub in self.subscriptions
         ]

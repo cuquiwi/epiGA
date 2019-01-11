@@ -9,25 +9,25 @@ optimal_path, distance = load_solution_file('res/a280.opt.tour', coordinates)
 
 print('Objective distance is:', distance)
 
-alg = EpigeneticAlgorithm(
-    individuals_number=50,
-    cells_number=10,
+# alg = EpigeneticAlgorithm(
+#     individuals_number=50,
+#     cells_number=25,
 
-    nucleo_prob=0.02,
+#     nucleo_prob=0.02,
 
-    nucleo_rad=3,
-    mechanisms=['position', 'imprinting', 'reprogramming'],
-    epi_probs=[1, 1, 0.3],
-    position_prob=.5,
+#     nucleo_rad=3,
+#     mechanisms=['position', 'imprinting', 'reprogramming'],
+#     epi_probs=[1, 1, 0.3],
+#     position_prob=.5,
 
-    max_epochs=500
-)
-
-# alg = TSPGeneticAlgorithm(
-#     population_size=100,
-#     mutation_rate=0.3,
 #     max_epochs=500
 # )
+
+alg = TSPGeneticAlgorithm(
+    population_size=200,
+    mutation_rate=0.04,
+    max_epochs=1000
+)
 
 alg.subscribe(GeneticMetricPrinter())
 

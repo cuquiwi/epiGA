@@ -207,7 +207,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
 
     def on_launch(self, coordinates, optimum_path):
         [
-            sub.on_launch(coordinates, optimum_path)
+            sub.on_launch(coordinates, optimum_path, epigenetic=False)
             for sub in self.subscriptions
         ]
 
@@ -217,7 +217,8 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
             sub.on_epoch(
                 [i.path for i in sorted_pop],
                 [i.distance for i in sorted_pop],
-                i
+                i,
+                epigenetic=False
             )
             for sub in self.subscriptions
         ]
