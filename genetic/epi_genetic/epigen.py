@@ -478,7 +478,7 @@ class EpigeneticAlgorithm(object):
         """
         if cell.mother == None or cell.father == None:
             return cell
-            
+
         mask = cell.nucleosome[:]
         changes = []
         for i in range(len(mask)):
@@ -487,12 +487,12 @@ class EpigeneticAlgorithm(object):
                 changes.append(i)
 
         bestCell = cell
-        
+
         for pos in changes:
             newMask = mask[:]
             newMask[pos] = 0
-            newSolution = self.crossover(cell.father,cell.mother,newMask)
-            newCell = Cell(newSolution,cell.father, cell.mother)
+            newSolution = self.crossover(cell.father, cell.mother, newMask)
+            newCell = Cell(newSolution, cell.father, cell.mother)
             fitness = self.evaluate_cell(newCell)
             if fitness < bestCell.fitness:
                 bestCell = newCell
@@ -503,6 +503,7 @@ class EpigeneticAlgorithm(object):
             cell.nucleosome = bestCell.nucleosome
 
         return cell
+
     def on_launch(self, coordinates, optimum_path):
         [
             sub.on_launch(coordinates, optimum_path)
@@ -510,11 +511,16 @@ class EpigeneticAlgorithm(object):
         ]
 
     def on_epoch(self, population, i):
-        sorted_pop = sorted(population, key=lambda i: self.evaluate_individual(i))
+        pop = [
+            list(map(lambda cell: cell, individual))
+            for individual in population
+        ]
+        pop = [item for sublist in pop for item in sublist]
+        sorted_pop = sorted(pop, key=lambda c: c.fitness)
         [
             sub.on_epoch(
-                [self.selectBestCell(i).solution for i in  sorted_pop],
-                [self.evaluate_individual(i) for i in sorted_pop],
+                [i.solution for i in sorted_pop],
+                [i.fitness for i in sorted_pop],
                 i
             )
             for sub in self.subscriptions
