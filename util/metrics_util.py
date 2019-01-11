@@ -9,8 +9,13 @@ class GeneticMetricPrinter(object):
         self.mean_fitness = []
         self.min_fitness = []
         self.ydata_iter = []
+        self.coordinates = []
+        self.optimun_path = []
 
-    def on_launch(self):
+    def on_launch(self, coordinates, optimun_path):
+        self.coordinates = coordinates
+        self.optimun_path = optimun_path
+
         plt.ion()
         # Set up plot
         self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
@@ -32,7 +37,7 @@ class GeneticMetricPrinter(object):
         self.ax2.legend()
         self.ax2.grid()
 
-    def on_running(self, coordinates, currentPath, optimum_path, title_string):
+    def on_running(self, currentPath, title_string):
         # Update data (with the new _and_ the old points)
         xdata = []
         ydata = []
@@ -40,18 +45,18 @@ class GeneticMetricPrinter(object):
         ydata_opt = []
 
         for i in range(len(currentPath)):
-            xdata.append(coordinates[currentPath[i]][0])
-            ydata.append(coordinates[currentPath[i]][1])
-        xdata.append(coordinates[currentPath[0]][0])
-        ydata.append(coordinates[currentPath[0]][1])
+            xdata.append(self.coordinates[currentPath[i]][0])
+            ydata.append(self.coordinates[currentPath[i]][1])
+        xdata.append(self.coordinates[currentPath[0]][0])
+        ydata.append(self.coordinates[currentPath[0]][1])
         self.lines.set_xdata(xdata)
         self.lines.set_ydata(ydata)
 
-        for i in range(len(optimum_path)):
-            xdata_opt.append(coordinates[optimum_path[i]][0])
-            ydata_opt.append(coordinates[optimum_path[i]][1])
-        xdata_opt.append(coordinates[optimum_path[0]][0])
-        ydata_opt.append(coordinates[optimum_path[0]][1])
+        for i in range(len(self.optimun_path)):
+            xdata_opt.append(self.coordinates[self.optimun_path[i]][0])
+            ydata_opt.append(self.coordinates[self.optimun_path[i]][1])
+        xdata_opt.append(self.coordinates[self.optimun_path[0]][0])
+        ydata_opt.append(self.coordinates[self.optimun_path[0]][1])
         self.lines_optimum.set_xdata(xdata_opt)
         self.lines_optimum.set_ydata(ydata_opt)
         # Need both of these in order to rescale
@@ -96,7 +101,7 @@ class GeneticMetricPrinter(object):
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
 
-    def on_epoch(self, population, fitnesses, coordinates, optimum_path, iteration):
+    def on_epoch(self, population, fitnesses, iteration):
         fitness = np.Infinity
         min_cell = None
         for individual, pivot_fitness in zip(population, fitnesses):
@@ -105,7 +110,7 @@ class GeneticMetricPrinter(object):
                 cell_fitness = list(map(lambda cell: cell.fitness, individual))
                 min_cell = individual[np.argmin(cell_fitness)]
 
-        self.on_running(coordinates, min_cell.solution, optimum_path,
+        self.on_running(min_cell.solution,
                         "Iteration: "+str(iteration) + " Best Path: " + str(int(fitness)))
         self.on_running_fitness(population,fitnesses, iteration, fitness,
                                 "Distances of the population")

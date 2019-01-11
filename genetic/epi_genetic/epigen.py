@@ -46,14 +46,14 @@ class EpigeneticAlgorithm(object):
 
         self.distances_matrix = self.calculate_distances(coordinates)
 
-        self.on_launch()
+        self.on_launch(coordinates, optimum_path)
 
         population = self.init_population()
         i = 0
         fitnesses = []
         while not self.termination(i, fitnesses):
 
-            self.on_epoch(population, coordinates, optimum_path, i)
+            self.on_epoch(population, i)
 
             newpop = self.selection(population)
             newpop = self.nucleosome_generation(newpop)
@@ -470,16 +470,17 @@ class EpigeneticAlgorithm(object):
             if current > pick:
                 return population[i]
 
-    def on_launch(self):
-        [sub.on_launch() for sub in self.subscriptions]
+    def on_launch(self, coordinates, optimum_path):
+        [
+            sub.on_launch(coordinates, optimum_path)
+            for sub in self.subscriptions
+        ]
 
-    def on_epoch(self, population, coordinates, optimum_path, i):
+    def on_epoch(self, population, i):
         [
             sub.on_epoch(
                 population,
                 [self.evaluate_individual(i) for i in population],
-                coordinates,
-                optimum_path,
                 i
             )
             for sub in self.subscriptions
