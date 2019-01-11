@@ -395,6 +395,7 @@ class EpigeneticAlgorithm(object):
 
             # If there is no change pass
             if cell.nucleosome[i] == False or random() > probability:
+            # if random() > probability: # Use this line to ignore mask in the mechanism application
                 continue
 
             # From wich parent the gene is from?
