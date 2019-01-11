@@ -182,10 +182,12 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
             TSPIndividual -- Mutated Individual
         """
 
-        while random() <= self.mutation_rate:
+        mut = 0
+        while mut < len(individual.path) and random() <= self.mutation_rate:
             origin = randint(0, len(individual.path)-1)
             end = randint(0, len(individual.path)-1)
             individual.path[origin], individual.path[end] = individual.path[end], individual.path[origin]
+            mut += 1
         return individual
 
     def do_next_generation(self, olders, newers):
