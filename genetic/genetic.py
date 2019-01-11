@@ -2,13 +2,14 @@ from random import sample, randint, random, shuffle
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 class TSPIndividual(object):
 
     def __init__(self, path):
         self.path = path
         self.fitness = None
         self.distance = None
-    
+
     def __repr__(self):
         return f'<TSPIndividual({self.fitness}, {self.distance}) {self.path}>'
 
@@ -21,23 +22,19 @@ class ITSPGeneticAlgorithm(object):
         self.mutation_rate = mutation_rate
         self.max_epochs = max_epochs
         self.elitism_rate = elitism_rate
-        self.xdata_fitness = []
-        self.ydata_fitness = []
+        self.subscriptions = []
 
-    def call(self, coordinates, optimal_path):
+    def call(self, coordinates, optimum_path):
         distance_matrix = self.calculate_distances(coordinates)
         population = self.do_initialize_population(len(distance_matrix))
-        
-        plt.ion()
 
-        self.on_launch(0, 10)
+        self.on_launch(coordinates, optimum_path)
 
-        i=0
-
+        i = 0
         for _ in range(self.max_epochs):
             self.do_calculate_fitness(population, distance_matrix)
-            self.print_metric(population, coordinates, optimal_path, i)
-            i = i+1
+
+            self.on_epoch(population, i)
 
             new_population = []
             for _ in range(self.population_size):
@@ -48,8 +45,10 @@ class ITSPGeneticAlgorithm(object):
 
             population = self.do_next_generation(population, new_population)
 
+            i = i+1
+
         return population
-    
+
     def calculate_distances(self, coordinates):
         distance_matrix = np.zeros((len(coordinates), len(coordinates)))
         for i in range(len(coordinates)):
@@ -58,20 +57,6 @@ class ITSPGeneticAlgorithm(object):
                     coordinates[i] - coordinates[j]
                 )
         return distance_matrix
-
-    def print_metric(self, population, coordinates, optimal_path, iteration):
-        fitness = 0
-        min_ind = None
-        #min_ind = max(population, key=lambda x:x.fitness)
-        for individual in population:
-            if individual.fitness >= fitness:
-                fitness = individual.fitness
-                min_ind = individual
-        print(f'Best Individual is: {min_ind}')
-
-        self.on_running(coordinates, min_ind.path, "Iteration: "+str(iteration) + " Best Path: " + str(min_ind.distance))
-        self.on_running_fitness(population, iteration, "Distances of the population")
-
 
     def do_initialize_population(self, n_cities):
         raise NotImplementedError()
@@ -91,53 +76,11 @@ class ITSPGeneticAlgorithm(object):
     def do_next_generation(self, olders, newers):
         raise NotImplementedError()
 
-    def on_launch(self, min_x, max_x):
-        #Set up plot
-        self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
-        self.lines, = self.ax.plot([],[], 'go-')
-        self.lines2, = self.ax2.plot([],[], 'b.')
-        #Autoscale on unknown axis and known lims on the other
-        self.ax.set_autoscaley_on(True)
-        self.ax2.set_autoscaley_on(True)
-        #Other stuff
-        self.ax.grid()
-        self.ax2.grid()
+    def on_epoch(self, population, i):
+        raise NotImplementedError()
 
-    def on_running(self, coordinates, currentPath, title_string):
-        #Update data (with the new _and_ the old points)
-        xdata = []
-        ydata = []
-        for i in range(len(currentPath)):
-            xdata.append(coordinates[currentPath[i]][0])
-            ydata.append(coordinates[currentPath[i]][1])
-        xdata.append(coordinates[currentPath[0]][0])
-        ydata.append(coordinates[currentPath[0]][1])
-        self.lines.set_xdata(xdata)
-        self.lines.set_ydata(ydata)
-        #Need both of these in order to rescale
-        self.ax.set_title(title_string)
-        self.ax.relim()
-        self.ax.autoscale_view()
-        #We need to draw *and* flush
-        #plt.title(title_string)
-        self.figure.canvas.draw()
-        self.figure.canvas.flush_events()
-
-    def on_running_fitness(self, population, iteration, title_string):
-        #Update data (with the new _and_ the old points)
-        for i in range(len(population)):
-            self.xdata_fitness.append(iteration)
-            self.ydata_fitness.append(population[i].distance)
-        self.lines2.set_xdata(self.xdata_fitness)
-        self.lines2.set_ydata(self.ydata_fitness)
-        #Need both of these in order to rescale
-        self.ax2.set_title(title_string)
-        self.ax2.relim()
-        self.ax2.autoscale_view()
-        #We need to draw *and* flush
-        #plt.title(title_string)
-        self.figure.canvas.draw()
-        #self.figure2.canvas.flush_events()
+    def on_launch(self, coordinates, optimum_path):
+        raise NotImplementedError()
 
 
 class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
@@ -151,7 +94,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
     def do_calculate_fitness(self, population, distances):
         """Calculates the fitness of the individual based on the distance between
         the cities
-        
+
         Arguments:
             population {List of TSPIndividual} -- Population
             distances {NxN float matrix} -- Distances between cities
@@ -179,10 +122,10 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         """Performs the selection over the population by choosing at random based
         on the fitness of the individuals. That is an individual with high fitness
         has more probabilities of being picked.
-        
+
         Arguments:
             population {List of TSPIndividual} -- Population with fitness calculated
-        
+
         Returns:
             TSPIndividual -- Selected
         """
@@ -202,7 +145,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         [4,2,3,1]
                 (pick from 1 to 2)[1,2,3,4]
         [3,2,1,4]
-        
+
         Returns:
             List of TSPIndividual -- Parents to crossover
         """
@@ -234,7 +177,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
 
         Arguments:
             individual {TSPIndividual} -- Individual to mutate
-        
+
         Returns:
             TSPIndividual -- Mutated Individual
         """
@@ -257,6 +200,27 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         """
         shuffle(newers)
         number_of_elite_ind = int(len(olders) * self.elitism_rate)
-        best_old = sorted(olders, key=lambda x:x.fitness, reverse=True)[:number_of_elite_ind]
+        best_old = sorted(olders, key=lambda x: x.fitness,
+                          reverse=True)[:number_of_elite_ind]
         newers[:number_of_elite_ind] = best_old
         return newers
+
+    def on_launch(self, coordinates, optimum_path):
+        [
+            sub.on_launch(coordinates, optimum_path)
+            for sub in self.subscriptions
+        ]
+
+    def on_epoch(self, population, i):
+        sorted_pop = sorted(population, key=lambda i: i.fitness, reverse=True)
+        [
+            sub.on_epoch(
+                [i.path for i in sorted_pop],
+                [i.distance for i in sorted_pop],
+                i
+            )
+            for sub in self.subscriptions
+        ]
+
+    def subscribe(self, subscriber):
+        self.subscriptions.append(subscriber)

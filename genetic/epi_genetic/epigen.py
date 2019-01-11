@@ -477,10 +477,11 @@ class EpigeneticAlgorithm(object):
         ]
 
     def on_epoch(self, population, i):
+        sorted_pop = sorted(population, key=lambda i: self.evaluate_individual(i))
         [
             sub.on_epoch(
-                population,
-                [self.evaluate_individual(i) for i in population],
+                [self.selectBestCell(i).solution for i in  sorted_pop],
+                [self.evaluate_individual(i) for i in sorted_pop],
                 i
             )
             for sub in self.subscriptions
