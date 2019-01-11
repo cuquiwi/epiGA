@@ -1,4 +1,5 @@
 from genetic.epi_genetic import EpigeneticAlgorithm
+from util.metrics_util import GeneticMetricPrinter
 import numpy as np
 from data_loader import load_solution_file, load_problem_file
 
@@ -18,7 +19,7 @@ optimal_path, distance = load_solution_file(
 
 print('Objective distance is:', distance)
 
-EpigeneticAlgorithm(
+alg = EpigeneticAlgorithm(
     individuals_number=50,
     cells_number=25,
 
@@ -30,6 +31,10 @@ EpigeneticAlgorithm(
     position_prob=.2,
 
     max_epochs=500
-).call(coordinates, optimal_path)
+)
+
+alg.subscribe(GeneticMetricPrinter())
+
+alg.call(coordinates, optimal_path)
 
 print('Objective distance is:', distance)
