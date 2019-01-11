@@ -16,9 +16,9 @@ alg = EpigeneticAlgorithm(
     nucleo_prob=0.02,
 
     nucleo_rad=3,
-    mechanisms=['position', 'imprinting'],
-    epi_probs=[0.8, 0.4],
-    position_prob=.2,
+    mechanisms=['position', 'imprinting', 'reprogramming'],
+    epi_probs=[1, 1, 0.3],
+    position_prob=.5,
 
     max_epochs=500
 )

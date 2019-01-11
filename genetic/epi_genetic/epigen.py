@@ -351,8 +351,8 @@ class EpigeneticAlgorithm(object):
                 if self.mechanisms[i] == "imprinting":
                     self.imprinting_mechanism(cell, self.imprinting_prob)
                 elif self.mechanisms[i] == "reprogramming":
-                    # TODO: Hacer reprogramming
-                    pass
+                    # TODO: Try the other reprograming
+                    self.reprograming1(cell, self.epi_probs[i])
                 elif self.mechanisms[i] == "paramutation":
                     # TODO: Hacer paramutation
                     pass
@@ -470,6 +470,39 @@ class EpigeneticAlgorithm(object):
             if current > pick:
                 return population[i]
 
+    def reprograming1(self, cell, prob):
+        """
+        Choose random gene from mask with one and substitute its first neighbor 
+        (might be right left or the longest of both) by the shortest path, and 
+        make the corresponding change in the rest of the genome
+        """
+        if cell.mother == None or cell.father == None:
+            return cell
+            
+        mask = cell.nucleosome[:]
+        changes = []
+        for i in range(len(mask)):
+            pos = mask[i]
+            if pos and random() < prob:
+                changes.append(i)
+
+        bestCell = cell
+        
+        for pos in changes:
+            newMask = mask[:]
+            newMask[pos] = 0
+            newSolution = self.crossover(cell.father,cell.mother,newMask)
+            newCell = Cell(newSolution,cell.father, cell.mother)
+            fitness = self.evaluate_cell(newCell)
+            if fitness < bestCell.fitness:
+                bestCell = newCell
+
+        if bestCell != cell:
+            cell.solution = bestCell.solution
+            cell.fitness = bestCell.fitness
+            cell.nucleosome = bestCell.nucleosome
+
+        return cell
     def on_launch(self, coordinates, optimum_path):
         [
             sub.on_launch(coordinates, optimum_path)
