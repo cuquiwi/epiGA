@@ -8,7 +8,7 @@ class EpigeneticAlgorithm(object):
 
     def __init__(self, individuals_number, cells_number, epi_probs,
                  nucleo_prob, nucleo_rad, mechanisms,
-                 position_prob=0.4, imprinting_prob=0.2,
+                #  position_prob=0.4, imprinting_prob=0.2,
                  max_epochs=500):
         """
         EpiGA based on the work by D.H. Stolfi and E. Alba, (2017).
@@ -31,8 +31,6 @@ class EpigeneticAlgorithm(object):
         self.nucleo_rad = nucleo_rad
         self.mechanisms = mechanisms
         self.max_epochs = max_epochs
-        self.position_prob = position_prob
-        self.imprinting_prob = imprinting_prob
         self.subscriptions = []
 
     def call(self, coordinates, optimum_path):
@@ -352,27 +350,26 @@ class EpigeneticAlgorithm(object):
         """
         modified = False
         for i in range(len(self.mechanisms)):
-            if random() < self.epi_probs[i]:
-                modified = True
-                if self.mechanisms[i] == "imprinting":
-                    self.imprinting_mechanism(cell, self.imprinting_prob)
-                elif self.mechanisms[i] == "reprogramming":
-                    self.reprograming1(cell, self.epi_probs[i])
-                    # self.reprograming2(cell, self.epi_probs[i])
-                elif self.mechanisms[i] == "paramutation":
-                    # TODO: Hacer paramutation
-                    pass
-                elif self.mechanisms[i] == "position":
-                    self.position_mechanism(cell, self.position_prob)
-                elif self.mechanisms[i] == "inactivation":
-                    # TODO: Hacer x-inactivation
-                    pass
-                elif self.mechanisms[i] == "bookmarking":
-                    # TODO: Hacer bookmarking
-                    pass
-                elif self.mechanisms[i] == "silencing":
-                    # TODO: Hacer gene silencing
-                    pass
+            modified = True
+            if self.mechanisms[i] == "imprinting":
+                self.imprinting_mechanism(cell, self.epi_probs[i])
+            elif self.mechanisms[i] == "reprogramming":
+                self.reprograming1(cell, self.epi_probs[i])
+                # self.reprograming2(cell, self.epi_probs[i])
+            elif self.mechanisms[i] == "paramutation":
+                # TODO: Hacer paramutation
+                pass
+            elif self.mechanisms[i] == "position":
+                self.position_mechanism(cell, self.epi_probs[i])
+            elif self.mechanisms[i] == "inactivation":
+                # TODO: Hacer x-inactivation
+                pass
+            elif self.mechanisms[i] == "bookmarking":
+                # TODO: Hacer bookmarking
+                pass
+            elif self.mechanisms[i] == "silencing":
+                # TODO: Hacer gene silencing
+                pass
         if modified:
             self.evaluate_cell(cell)
         return cell
