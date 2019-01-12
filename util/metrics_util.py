@@ -94,7 +94,6 @@ class GeneticMetricPrinter(object):
     def on_running_fitness(self, solutions, fitnesses, iteration, min_fit, title_string, epigenetic, minimum):
         # Update data (with the new _and_ the old points)
         total_fitness = 0
-        j = 0
 
         # All fitness points:
 
