@@ -16,23 +16,23 @@ class TSPIndividual(object):
 
 class ITSPGeneticAlgorithm(object):
 
-    def __init__(self, population_size=100, mutation_rate=.01, elitism_rate=0.2,
+    def __init__(self, population_size=100, mutation_rate=.01,
                  max_epochs=10000):
         self.population_size = population_size
         self.mutation_rate = mutation_rate
         self.max_epochs = max_epochs
-        self.elitism_rate = elitism_rate
         self.subscriptions = []
 
     def call(self, coordinates, optimum_path):
         distance_matrix = self.calculate_distances(coordinates)
         population = self.do_initialize_population(len(distance_matrix))
+        self.do_calculate_fitness(population, distance_matrix)
 
         self.on_launch(coordinates, optimum_path)
 
         i = 0
         for _ in range(self.max_epochs):
-            self.do_calculate_fitness(population, distance_matrix)
+            
 
             self.on_epoch(population, i)
 
@@ -43,6 +43,7 @@ class ITSPGeneticAlgorithm(object):
                 child = self.do_mutation(child)
                 new_population.append(child)
 
+            self.do_calculate_fitness(new_population, distance_matrix)
             population = self.do_next_generation(population, new_population)
 
             i = i+1
@@ -200,12 +201,11 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         Output:
             Final population of the current epoch.
         """
-        shuffle(newers)
-        number_of_elite_ind = int(len(olders) * self.elitism_rate)
-        best_old = sorted(olders, key=lambda x: x.fitness,
-                          reverse=True)[:number_of_elite_ind]
-        newers[:number_of_elite_ind] = best_old
-        return newers
+        newpop = sorted(
+            [*olders, *newers], key=lambda x: x.fitness,
+            reverse=True
+        )
+        return newpop[:self.population_size]
 
     def on_launch(self, coordinates, optimum_path):
         [
