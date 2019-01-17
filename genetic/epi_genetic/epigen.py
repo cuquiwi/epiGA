@@ -52,8 +52,12 @@ class EpigeneticAlgorithm(object):
         while not self.termination(i, fitnesses):
 
             self.on_epoch(population, i)
+            
+            # This previous selection has been omitted because there is a 
+            # Roulette Wheel implemented in the nuclosome based reproduction
+            # newpop = self.selection(population)
+            newpop = population[:]
 
-            newpop = self.selection(population)
             newpop = self.nucleosome_generation(newpop)
             newpop = self.nucleosome_reproduction(newpop)
             newpop = self.epigen_mechanism(newpop)
@@ -128,7 +132,7 @@ class EpigeneticAlgorithm(object):
 
     def evaluate_individual(self, individual):
         """
-        Get the total fitness of the individual, the sum of the fitness of its cells.
+        Get the total fitness of the individual, the fitness of its best cell.
         Input:
             - individual: Individual, represented by a list of cells
         Return:
