@@ -69,7 +69,7 @@ class EpigeneticAlgorithm(object):
             )
             i += 1
         resultingFitness = [cell.fitness for individual in population for cell in individual]
-        sorted(resultingFitness)
+        resultingFitness = sorted(resultingFitness)
         return resultingFitness[0]
 
     def calculate_distances(self, coordinates):
