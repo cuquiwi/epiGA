@@ -48,7 +48,7 @@ class ITSPGeneticAlgorithm(object):
 
             i = i+1
 
-        return population
+        return sorted(population, key = lambda ind: ind.distance)[0].distance
 
     def calculate_distances(self, coordinates):
         distance_matrix = np.zeros((len(coordinates), len(coordinates)))
