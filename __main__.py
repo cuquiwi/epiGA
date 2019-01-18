@@ -5,8 +5,8 @@ import numpy as np
 from data_loader import load_solution_file, load_problem_file
 import time
 
-coordinates = load_problem_file('res/berlin52.tsp')
-optimal_path, distance = load_solution_file('res/berlin52.opt.tour', coordinates)
+coordinates = load_problem_file('res/circle50.tsp')
+optimal_path, distance = load_solution_file('res/circle50.opt.tour', coordinates)
 
 print('Objective distance is:', distance)
 

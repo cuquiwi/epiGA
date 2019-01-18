@@ -47,11 +47,6 @@ class GeneticMetricPrinter(object):
 
     def on_epoch(self, solutions, fitnesses, iteration, epigenetic=True, minimum = None):
         """Receives solutions sorted by their fitness
-        
-        Arguments:
-            solutions {[type]} -- [description]
-            fitnesses {[type]} -- [description]
-            iteration {[type]} -- [description]
         """
         best_solution = solutions[0]
         best_fitness = fitnesses[0]

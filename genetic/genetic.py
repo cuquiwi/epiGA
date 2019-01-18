@@ -214,7 +214,7 @@ class TSPGeneticAlgorithm(ITSPGeneticAlgorithm):
         ]
 
     def on_epoch(self, population, i):
-        sorted_pop = sorted(population, key=lambda i: i.fitness, reverse=True)
+        sorted_pop = sorted(population, key=lambda i: i.distance)
         [
             sub.on_epoch(
                 [i.path for i in sorted_pop],
