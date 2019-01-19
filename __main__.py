@@ -5,7 +5,7 @@ from data_loader import load_solution_file, load_problem_file
 import time
 
 from multiprocessing.pool import Pool
-from threading import active_count
+from multiprocessing import cpu_count
 from functools import partial
 import json
 
@@ -27,7 +27,7 @@ for problem in ['circle25', 'circle50', 'berlin52', 'a280']:
                      individuals_number=100,
                      cells_number=10,
                      nucleo_prob=0.02,
-                     nucleo_rad=2,
+                     nucleo_rad=int(len(optimal_path)*.05),
                      mechanisms=['position', 'imprinting', 'reprogramming'],
                      epi_probs=[.2, .2, 0.1],
                      max_epochs=500
@@ -39,7 +39,7 @@ for problem in ['circle25', 'circle50', 'berlin52', 'a280']:
                     max_epochs=500
                 )
 
-        with Pool(active_count()) as pool:
+        with Pool(cpu_count()) as pool:
             results = pool.map(
                 partial(_run, alg=alg, coordinates=coordinates, optimal_path=optimal_path),
                 list(range(20))
