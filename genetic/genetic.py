@@ -57,7 +57,7 @@ class ITSPGeneticAlgorithm(object):
     
     def termination(self, i, fitnesses):
         """
-        Termination condition for the EpiGA. It will stop whenever it gets to a 
+        Termination condition for the GA. It will stop whenever it gets to a 
         maximun epochs or the last fitnesses are equal.
 
         Inputs:
