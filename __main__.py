@@ -5,8 +5,12 @@ import numpy as np
 from data_loader import load_solution_file, load_problem_file
 import time
 
-coordinates = load_problem_file('res/circle50.tsp')
-optimal_path, distance = load_solution_file('res/circle50.opt.tour', coordinates)
+from multiprocessing.pool import Pool
+from threading import active_count
+from functools import partial
+
+coordinates = load_problem_file('res/circle25.tsp')
+optimal_path, distance = load_solution_file('res/circle25.opt.tour', coordinates)
 
 print('Objective distance is:', distance)
 
@@ -31,16 +35,19 @@ alg = TSPGeneticAlgorithm(
 
 alg.subscribe(GeneticMetricPrinter())
 
-perfs = []
-results = []
-for _ in range(20):
+def _run(i, alg, coordinates, optimal_path):
     start = time.time()
     result = alg.call(coordinates, optimal_path)
-    perfs.append(time.time() - start)
-    print('-Obtained distance is:', result)
+    elapsed = time.time() - start
+    print(f'[{i}] Obtained distance is:', result)
     results.append(result)
+    return result, elapsed
+
+with Pool(active_count()) as pool:
+    results = pool.map(
+        partial(_run, alg=alg, coordinates=coordinates, optimal_path=optimal_path),
+        list(range(20))
+    )
 
 print('Results')
 print(results)
-print('Perfs')
-print(perfs)

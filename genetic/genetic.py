@@ -31,7 +31,8 @@ class ITSPGeneticAlgorithm(object):
         self.on_launch(coordinates, optimum_path)
 
         i = 0
-        for _ in range(self.max_epochs):
+        fitnesses = []
+        while not self.termination(i, fitnesses):
             
 
             self.on_epoch(population, i)
@@ -46,9 +47,34 @@ class ITSPGeneticAlgorithm(object):
             self.do_calculate_fitness(new_population, distance_matrix)
             population = self.do_next_generation(population, new_population)
 
+            fitnesses.append(
+                np.average([i.fitness for i in population])
+            )
+
             i = i+1
 
         return sorted(population, key = lambda ind: ind.distance)[0].distance
+    
+    def termination(self, i, fitnesses):
+        """
+        Termination condition for the EpiGA. It will stop whenever it gets to a 
+        maximun epochs or the last fitnesses are equal.
+
+        Inputs:
+            - i: Current iteration of the algorithm.
+            - fitnesses: fitness in all the iterations
+        Output:
+            True if the termination condition is accomplished, False
+            otherwise.
+        """
+        if i >= self.max_epochs:
+            print(f"Terminated due to maximum number of epochs reached ={self.max_epochs}")
+            return True
+        if i >= 15 and np.average(fitnesses[-15:]) == fitnesses[-1]:
+            print("Terminated due to apparent convergence.")
+            print("More than 15 epochs have passed with no chane in individual average fitness")
+            return True
+        return False
 
     def calculate_distances(self, coordinates):
         distance_matrix = np.zeros((len(coordinates), len(coordinates)))
