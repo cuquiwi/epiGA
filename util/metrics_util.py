@@ -24,7 +24,7 @@ class GeneticMetricPrinter(object):
 
         plt.ion()
         # Set up plot
-        self.figure, (self.ax, self.ax2) = plt.subplots(1, 2)
+        self.figure, (self.ax, self.ax2) = plt.subplots(1, 2, figsize=(30, 15), dpi=80)
         self.lines, = self.ax.plot([], [], 'go-', label="Path found")
         self.lines_optimum, = self.ax.plot(
             [], [], 'ro-.', alpha=0.5, label="Optimal path")
@@ -124,3 +124,6 @@ class GeneticMetricPrinter(object):
 
         self.figure.canvas.draw()
         self.figure.canvas.flush_events()
+
+    def save(self, name):
+        plt.savefig(name + '.svg', format='svg')
