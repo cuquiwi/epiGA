@@ -21,7 +21,7 @@ There is an example [\__main__.py](https://github.com/cuquiwi/epiGA/blob/master/
 which can be modified in order to run different experiments. In the folder [res](https://github.com/cuquiwi/epiGA/tree/master/res)
 there is also a set of examples that can be used to show see how the algorithms perform.
 
-![Running algorithm](https://media.giphy.com/media/7SKFEfMR55qnti54wd/giphy.gif)
+![Running algorithm](https://media.giphy.com/media/YkCzdiY2aZzeMZQUzy/giphy.gif)
 
 
 Contributors:
